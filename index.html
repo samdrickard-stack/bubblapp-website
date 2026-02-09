@@ -45,7 +45,7 @@
             will-change: left, top, transform;
         }
         .glossy-bubble:active { cursor: grabbing; }
-        .glossy-bubble.static-bubble { cursor: grab; opacity: 0.6; filter: saturate(0.5); }
+        .glossy-bubble.static-bubble { opacity: 0.6; filter: saturate(0.5); }
 
         .bubble-sphere {
             width: 100%; height: 100%; border-radius: 50%;
@@ -76,9 +76,12 @@
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             color: white; font-weight: 600; text-align: center;
-            line-height: 1.2; text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            max-width: 80%; pointer-events: none;
+            line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            white-space: normal; overflow: hidden;
+            width: 70%; max-height: 70%;
+            word-wrap: break-word; overflow-wrap: break-word;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
         }
 
         /* Progress ring for long-press */
@@ -602,7 +605,14 @@
         el.style.opacity = '0';
         setTimeout(() => { el.style.opacity = '1'; el.style.transition = 'opacity 0.5s'; }, 150 + index * 120);
 
-        const fontSize = Math.max(11, data.size / 8);
+        // Scale font to fit inside bubble — shorter labels get bigger text
+        const textLen = data.label.length;
+        let fontSize;
+        if (textLen <= 4) fontSize = data.size / 5.5;        // "Gym" → large
+        else if (textLen <= 10) fontSize = data.size / 7;    // "Meal prep" → medium
+        else if (textLen <= 15) fontSize = data.size / 8;    // "Buy groceries" → standard
+        else fontSize = data.size / 9;                        // "Pick up parcel" → smaller
+        fontSize = Math.max(10, Math.min(18, fontSize));
         const radius = data.size / 2;
 
         // Physics state for this bubble
@@ -1143,18 +1153,27 @@
         void counter.offsetWidth;
         counter.classList.add('bump');
 
-        // Remove from physics and respawn as static
+        // Remove from physics and respawn as fully poppable (on repeat)
         setTimeout(() => {
             state.el.remove();
             const idx = bubbleStates.indexOf(state);
             if (idx > -1) bubbleStates.splice(idx, 1);
 
-            const canvasRect = canvas.getBoundingClientRect();
+            // Respawn with new random position and fresh random badges
             const newData = { ...state.data,
                 x: 10 + Math.random() * 75,
                 y: 15 + Math.random() * 65,
             };
-            createBubble(newData, Math.floor(Math.random() * 3), false);
+            // Re-randomize badges for the respawned bubble
+            delete newData.due; delete newData.checklist;
+            delete newData.taggedPartner; delete newData.sender;
+            if (Math.random() < 0.6) newData.due = DUE_OPTIONS[Math.floor(Math.random() * DUE_OPTIONS.length)];
+            if (Math.random() < 0.4) newData.checklist = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
+            const shareRoll = Math.random();
+            if (shareRoll < 0.3) newData.taggedPartner = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
+            else if (shareRoll < 0.55) newData.sender = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
+
+            createBubble(newData, Math.floor(Math.random() * 3), true);
         }, 1000 + Math.random() * 500);
     }
 
