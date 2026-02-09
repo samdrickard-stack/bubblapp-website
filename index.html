@@ -100,13 +100,6 @@
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255,255,255,0.15);
         }
-        .badge-category {
-            bottom: -6px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.9);
-        }
-        .badge-category .cat-dot {
-            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-        }
         .badge-due {
             top: -8px; left: 50%; transform: translateX(-50%);
             color: white; font-size: 8px;
@@ -116,9 +109,20 @@
         .badge-due.tomorrow { background: rgba(155,89,182,0.7); }
         .badge-due.future { background: rgba(91,141,239,0.6); }
         .badge-checklist {
-            bottom: -6px; right: -4px;
+            bottom: -6px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.7); color: rgba(255,255,255,0.9);
             font-size: 8px; border-radius: 6px; padding: 2px 5px;
+        }
+        .badge-partner {
+            bottom: -6px; right: -4px;
+            background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.9);
+            font-size: 8px; border-radius: 6px; padding: 2px 5px;
+            display: flex; align-items: center; gap: 3px;
+        }
+        .badge-partner .partner-avatar {
+            width: 12px; height: 12px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 7px; color: white; font-weight: 700; flex-shrink: 0;
         }
 
         /* Pop effects */
@@ -448,18 +452,41 @@
     // ═══════════════════════════════════════════════════
     // BUBBLE DATA WITH BADGES
     // ═══════════════════════════════════════════════════
+    // Bubbles positioned around the edges to avoid hero content center
     const BUBBLES = [
-        { label: 'Buy groceries', color: '#5B8DEF', size: 110, x: 8, y: 18, cat: 'Errands', catColor: '#9B59B6', due: 'Today', checklist: '2/5' },
-        { label: 'Call dentist', color: '#E056A0', size: 90, x: 78, y: 14, cat: 'Health', catColor: '#00D4FF', due: 'Tomorrow' },
-        { label: 'Finish report', color: '#9B59B6', size: 105, x: 14, y: 62, cat: 'Work', catColor: '#E056A0', due: 'Overdue' },
-        { label: 'Gym', color: '#00D4FF', size: 75, x: 85, y: 58, cat: 'Health', catColor: '#00D4FF' },
-        { label: 'Pick up parcel', color: '#FFD166', size: 95, x: 5, y: 40, cat: 'Errands', catColor: '#9B59B6', due: '14 Feb' },
-        { label: 'Book flights', color: '#FF8E53', size: 88, x: 82, y: 36, cat: 'Personal', catColor: '#5B8DEF', due: '20 Feb', checklist: '0/3' },
-        { label: 'Walk the dog', color: '#4DC9A8', size: 78, x: 68, y: 76, cat: 'Family', catColor: '#00B4D8' },
-        { label: 'Meal prep', color: '#00B4D8', size: 72, x: 22, y: 80, cat: 'Health', catColor: '#00D4FF', due: 'Today' },
-        { label: 'Reply to Sam', color: '#E06B85', size: 85, x: 55, y: 18, cat: 'Work', catColor: '#E056A0' },
-        { label: 'Water plants', color: '#3EAF85', size: 70, x: 42, y: 70, cat: 'Home', catColor: '#4DC9A8', due: 'Tomorrow' },
+        { label: 'Buy groceries', color: '#5B8DEF', size: 110, x: 3, y: 12 },
+        { label: 'Call dentist', color: '#E056A0', size: 90, x: 82, y: 10 },
+        { label: 'Finish report', color: '#9B59B6', size: 105, x: 5, y: 65 },
+        { label: 'Gym', color: '#00D4FF', size: 75, x: 88, y: 60 },
+        { label: 'Pick up parcel', color: '#FFD166', size: 95, x: 2, y: 38 },
+        { label: 'Book flights', color: '#FF8E53', size: 88, x: 85, y: 35 },
+        { label: 'Walk the dog', color: '#4DC9A8', size: 78, x: 75, y: 80 },
+        { label: 'Meal prep', color: '#00B4D8', size: 72, x: 15, y: 82 },
+        { label: 'Reply to Sam', color: '#E06B85', size: 85, x: 88, y: 82 },
+        { label: 'Water plants', color: '#3EAF85', size: 70, x: 5, y: 82 },
     ];
+
+    // Randomize badges on each bubble
+    const DUE_OPTIONS = ['Overdue', 'Today', 'Tomorrow', '14 Feb', '20 Feb', '28 Feb'];
+    const CHECKLIST_OPTIONS = ['1/3', '2/5', '0/4', '3/6', '1/2', '4/7'];
+    const PARTNER_NAMES = ['Jess', 'Tom', 'Mia', 'Alex', 'Lily'];
+    const PARTNER_COLORS = ['#5B8DEF', '#E056A0', '#9B59B6', '#00D4FF', '#4DC9A8'];
+    const SHARE_DIRECTIONS = ['shared', 'received'];
+
+    // Assign random badges: each bubble gets 0-3 badge types randomly
+    BUBBLES.forEach(b => {
+        // ~60% chance of a due date
+        if (Math.random() < 0.6) b.due = DUE_OPTIONS[Math.floor(Math.random() * DUE_OPTIONS.length)];
+        // ~40% chance of a checklist
+        if (Math.random() < 0.4) b.checklist = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
+        // ~35% chance of a partner badge
+        if (Math.random() < 0.35) {
+            const pi = Math.floor(Math.random() * PARTNER_NAMES.length);
+            b.partner = PARTNER_NAMES[pi];
+            b.partnerColor = PARTNER_COLORS[pi];
+            b.shareDir = SHARE_DIRECTIONS[Math.floor(Math.random() * 2)];
+        }
+    });
 
     const canvas = document.getElementById('heroCanvas');
     let popCount = 0;
@@ -593,9 +620,7 @@
 
         // Build badges HTML
         let badgesHTML = '';
-        if (data.cat) {
-            badgesHTML += `<div class="bubble-badge badge-category"><span class="cat-dot" style="background:${data.catColor}"></span>${data.cat}</div>`;
-        }
+        // Due date badge (top center)
         if (data.due) {
             let dueClass = 'future';
             if (data.due === 'Overdue') dueClass = 'overdue';
@@ -603,8 +628,15 @@
             else if (data.due === 'Tomorrow') dueClass = 'tomorrow';
             badgesHTML += `<div class="bubble-badge badge-due ${dueClass}">${data.due}</div>`;
         }
+        // Checklist badge (bottom center)
         if (data.checklist) {
             badgesHTML += `<div class="bubble-badge badge-checklist">&#9745; ${data.checklist}</div>`;
+        }
+        // Partner badge (bottom right)
+        if (data.partner) {
+            const initial = data.partner[0];
+            const icon = data.shareDir === 'received' ? '&#8592;' : '&#8594;';
+            badgesHTML += `<div class="bubble-badge badge-partner"><span class="partner-avatar" style="background:${data.partnerColor}">${initial}</span>${icon} ${data.partner}</div>`;
         }
 
         // Progress ring SVG
@@ -729,12 +761,93 @@
     }
 
     // ═══════════════════════════════════════════════════
+    // OBSTACLE COLLISION (hero content elements)
+    // ═══════════════════════════════════════════════════
+    const heroContent = document.querySelector('.hero-content');
+
+    // Get hero-content as a rectangular obstacle relative to canvas
+    function getObstacleRect() {
+        const cr = canvas.getBoundingClientRect();
+        const hr = heroContent.getBoundingClientRect();
+        const padding = 10; // Extra buffer so bubbles don't touch text
+        return {
+            left: hr.left - cr.left - padding,
+            top: hr.top - cr.top - padding,
+            right: hr.right - cr.left + padding,
+            bottom: hr.bottom - cr.top + padding,
+        };
+    }
+
+    // Resolve circle vs axis-aligned rectangle collision
+    function resolveCircleRect(s, rect) {
+        // Bubble center
+        const cx = s.x + s.radius;
+        const cy = s.y + s.radius;
+
+        // Find closest point on rectangle to circle center
+        const nearestX = Math.max(rect.left, Math.min(cx, rect.right));
+        const nearestY = Math.max(rect.top, Math.min(cy, rect.bottom));
+
+        const dx = cx - nearestX;
+        const dy = cy - nearestY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < s.radius && dist > 0.001) {
+            // Push bubble out
+            const overlap = s.radius - dist;
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const sepAmount = overlap + 2.0;
+
+            s.x += nx * sepAmount;
+            s.y += ny * sepAmount;
+
+            // Bounce velocity (soft, like obstacle collision in app)
+            const velAlongNormal = s.vx * nx + s.vy * ny;
+            if (velAlongNormal < 0) {
+                s.vx -= (1 + 0.3) * velAlongNormal * nx * 0.5;
+                s.vy -= (1 + 0.3) * velAlongNormal * ny * 0.5;
+            }
+
+            // Update anchor to prevent vibration
+            s.anchorX += nx * sepAmount * 0.5;
+            s.anchorY += ny * sepAmount * 0.5;
+
+            // Squish
+            const impactStrength = Math.min(1, overlap / 5);
+            s.squishX = 1.0 + PHYSICS.squishAmount * impactStrength;
+            s.squishY = 1.0 - PHYSICS.squishAmount * impactStrength * 0.6;
+        } else if (dist === 0) {
+            // Circle center is inside rectangle — push out to nearest edge
+            const distToLeft = cx - rect.left;
+            const distToRight = rect.right - cx;
+            const distToTop = cy - rect.top;
+            const distToBottom = rect.bottom - cy;
+            const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+
+            let pushX = 0, pushY = 0;
+            if (minDist === distToLeft) pushX = -(distToLeft + s.radius + 2);
+            else if (minDist === distToRight) pushX = distToRight + s.radius + 2;
+            else if (minDist === distToTop) pushY = -(distToTop + s.radius + 2);
+            else pushY = distToBottom + s.radius + 2;
+
+            s.x += pushX;
+            s.y += pushY;
+            s.anchorX += pushX * 0.5;
+            s.anchorY += pushY * 0.5;
+            s.vx *= -0.3;
+            s.vy *= -0.3;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
     // PHYSICS ENGINE (60fps loop)
     // ═══════════════════════════════════════════════════
     function physicsStep() {
         const canvasRect = canvas.getBoundingClientRect();
         const cw = canvasRect.width;
         const ch = canvasRect.height;
+        const obstacleRect = getObstacleRect();
 
         for (let i = 0; i < bubbleStates.length; i++) {
             const s = bubbleStates[i];
@@ -793,6 +906,9 @@
                 s.vy = -Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3;
                 s.anchorY = Math.min(ch - s.radius * 0.5, s.anchorY);
             }
+
+            // ── Hero content obstacle collision ──
+            resolveCircleRect(s, obstacleRect);
 
             // ── Squish spring-back ──
             const squishDx = 1.0 - s.squishX;
