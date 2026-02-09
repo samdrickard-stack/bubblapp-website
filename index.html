@@ -243,6 +243,7 @@
             background: linear-gradient(135deg, #FFF 0%, #F1F5F9 50%, var(--blue) 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
+        .hero h1 em { font-style: italic; }
         .hero p { font-size: clamp(17px,2.2vw,20px); color: var(--text-secondary); max-width: 500px; line-height: 1.6; margin: 0 auto 20px; }
         .hero-tap-hint { font-size: 13px; color: var(--text-tertiary); margin-bottom: 36px; animation: fadeInUp 1s ease 1.5s both; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -369,9 +370,8 @@
         <div class="bubble-canvas" id="heroCanvas"></div>
         <div class="hero-content">
             <div class="hero-badge"><span class="hero-badge-dot"></span> Available on iOS</div>
-            <h1>Clear your mind,<br>one bubble at a time</h1>
-            <p>Bubbl turns your tasks into floating bubbles. Create them with your voice, organise them visually, and pop them when they're done.</p>
-            <p class="hero-tap-hint">&#128070; Hold down a bubble to pop it &mdash; drag to rearrange</p>
+            <h1><em>Do</em> Lighter.</h1>
+            <p class="hero-tap-hint">Hold down any bubble to pop it or move them around.</p>
             <div class="hero-buttons">
                 <a href="https://apps.apple.com/app/id6758945006" class="btn-primary" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
@@ -518,8 +518,8 @@
         collisionImpulseScale: 0.3,  // How strong collision response is
         separationStrength: 1.0,     // Overlap push-apart strength
         anchorReturnStrength: 0.15,  // Pull back to home position
-        orbitRadius: 0.3,            // Subtle breathing motion
-        orbitSpeed: 0.002,           // Breathing speed (radians/frame)
+        orbitRadius: 3.0,             // Gentle visible float motion
+        orbitSpeed: 0.008,           // Breathing speed (radians/frame)
         randomDriftStrength: 0.008,  // Organic micro-drift
         maxVelocity: 0.8,            // Speed cap
         dragThrowMultiplier: 0.12,   // Gentle throw on release
@@ -765,8 +765,8 @@
             }
             const cr = canvas.getBoundingClientRect();
             let nx = origX + dx, ny = origY + dy;
-            nx = Math.max(0, Math.min(cr.width - data.size, nx));
-            ny = Math.max(0, Math.min(cr.height - data.size, ny));
+            nx = Math.max(5, Math.min(cr.width - data.size - 5, nx));
+            ny = Math.max(15, Math.min(cr.height - data.size - 10, ny));
             state.x = nx;
             state.y = ny;
 
@@ -959,26 +959,29 @@
             s.x += s.vx;
             s.y += s.vy;
 
-            // ── Boundary collisions (soft bounce off walls) ──
-            if (s.x < 0) {
-                s.x = 0;
+            // ── Boundary collisions (padded to prevent badge clipping) ──
+            const padTop = 15;   // space for due-date badge above
+            const padBot = 10;   // space for checklist/avatar badge below
+            const padX = 5;      // small side buffer
+            if (s.x < padX) {
+                s.x = padX;
                 s.vx = Math.abs(s.vx) * PHYSICS.bounceDamping * 0.3;
-                s.anchorX = Math.max(s.radius * 0.5, s.anchorX);
+                s.anchorX = Math.max(padX + s.radius * 0.5, s.anchorX);
             }
-            if (s.x > cw - s.data.size) {
-                s.x = cw - s.data.size;
+            if (s.x > cw - s.data.size - padX) {
+                s.x = cw - s.data.size - padX;
                 s.vx = -Math.abs(s.vx) * PHYSICS.bounceDamping * 0.3;
-                s.anchorX = Math.min(cw - s.radius * 0.5, s.anchorX);
+                s.anchorX = Math.min(cw - s.radius * 0.5 - padX, s.anchorX);
             }
-            if (s.y < 0) {
-                s.y = 0;
+            if (s.y < padTop) {
+                s.y = padTop;
                 s.vy = Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3;
-                s.anchorY = Math.max(s.radius * 0.5, s.anchorY);
+                s.anchorY = Math.max(padTop + s.radius * 0.5, s.anchorY);
             }
-            if (s.y > ch - s.data.size) {
-                s.y = ch - s.data.size;
+            if (s.y > ch - s.data.size - padBot) {
+                s.y = ch - s.data.size - padBot;
                 s.vy = -Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3;
-                s.anchorY = Math.min(ch - s.radius * 0.5, s.anchorY);
+                s.anchorY = Math.min(ch - s.radius * 0.5 - padBot, s.anchorY);
             }
 
             // ── Hero content obstacle collision ──
@@ -1159,10 +1162,10 @@
             const idx = bubbleStates.indexOf(state);
             if (idx > -1) bubbleStates.splice(idx, 1);
 
-            // Respawn with new random position and fresh random badges
+            // Respawn with new random position (within safe padded zone)
             const newData = { ...state.data,
-                x: 10 + Math.random() * 75,
-                y: 15 + Math.random() * 65,
+                x: 5 + Math.random() * 80,
+                y: 8 + Math.random() * 70,
             };
             // Re-randomize badges for the respawned bubble
             delete newData.due; delete newData.checklist;
