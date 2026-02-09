@@ -45,7 +45,7 @@
             will-change: left, top, transform;
         }
         .glossy-bubble:active { cursor: grabbing; }
-        .glossy-bubble.static-bubble { cursor: default; opacity: 0.6; filter: saturate(0.5); }
+        .glossy-bubble.static-bubble { cursor: grab; opacity: 0.6; filter: saturate(0.5); }
 
         .bubble-sphere {
             width: 100%; height: 100%; border-radius: 50%;
@@ -92,37 +92,42 @@
             transition: none;
         }
 
-        /* Badges */
+        /* Badges - positioned on bubble circumference matching iOS app */
         .bubble-badge {
-            position: absolute; padding: 2px 7px; border-radius: 8px;
-            font-size: 9px; font-weight: 600; white-space: nowrap;
-            pointer-events: none; display: flex; align-items: center; gap: 3px;
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.15);
+            position: absolute; pointer-events: none;
+            white-space: nowrap;
         }
+        /* Due date: floats above bubble center, offset by radius + 8px */
         .badge-due {
-            top: -8px; left: 50%; transform: translateX(-50%);
-            color: white; font-size: 8px;
-        }
-        .badge-due.overdue { background: rgba(239,68,68,0.8); }
-        .badge-due.today { background: rgba(184,41,221,0.8); }
-        .badge-due.tomorrow { background: rgba(155,89,182,0.7); }
-        .badge-due.future { background: rgba(91,141,239,0.6); }
-        .badge-checklist {
-            bottom: -6px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.7); color: rgba(255,255,255,0.9);
-            font-size: 8px; border-radius: 6px; padding: 2px 5px;
-        }
-        .badge-partner {
-            bottom: -6px; right: -4px;
-            background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.9);
-            font-size: 8px; border-radius: 6px; padding: 2px 5px;
+            left: 50%; transform: translateX(-50%);
+            padding: 3px 8px; border-radius: 10px;
+            font-size: 9px; font-weight: 600; color: white;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 0.5px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             display: flex; align-items: center; gap: 3px;
         }
-        .badge-partner .partner-avatar {
-            width: 12px; height: 12px; border-radius: 50%;
+        .badge-due.overdue { background: rgba(239,68,68,0.85); }
+        .badge-due.today { background: rgba(184,41,221,0.85); }
+        .badge-due.tomorrow { background: rgba(155,89,182,0.75); }
+        .badge-due.future { background: rgba(91,141,239,0.65); }
+        /* Checklist: bottom-right at 45° on circumference */
+        .badge-checklist {
+            background: rgba(0,0,0,0.5); color: white;
+            font-size: 9px; font-weight: 700; border-radius: 10px;
+            padding: 3px 6px;
+            display: flex; align-items: center; gap: 3px;
+        }
+        .badge-checklist.complete { background: rgba(76,175,80,0.8); }
+        /* Partner/Sender avatar: circle on circumference */
+        .badge-avatar {
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.8);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             display: flex; align-items: center; justify-content: center;
-            font-size: 7px; color: white; font-weight: 700; flex-shrink: 0;
+            font-weight: 600; color: white;
+            background: linear-gradient(135deg, #00D4FF, #5B8DEF, #9B59B6);
+            overflow: hidden;
         }
 
         /* Pop effects */
@@ -466,25 +471,31 @@
         { label: 'Water plants', color: '#3EAF85', size: 70, x: 5, y: 82 },
     ];
 
-    // Randomize badges on each bubble
+    // Randomize badges on each bubble (matching app badge types)
     const DUE_OPTIONS = ['Overdue', 'Today', 'Tomorrow', '14 Feb', '20 Feb', '28 Feb'];
-    const CHECKLIST_OPTIONS = ['1/3', '2/5', '0/4', '3/6', '1/2', '4/7'];
+    const CHECKLIST_OPTIONS = [
+        { done: 1, total: 3 }, { done: 2, total: 5 }, { done: 0, total: 4 },
+        { done: 3, total: 6 }, { done: 1, total: 2 }, { done: 4, total: 4 },
+    ];
     const PARTNER_NAMES = ['Jess', 'Tom', 'Mia', 'Alex', 'Lily'];
-    const PARTNER_COLORS = ['#5B8DEF', '#E056A0', '#9B59B6', '#00D4FF', '#4DC9A8'];
-    const SHARE_DIRECTIONS = ['shared', 'received'];
 
-    // Assign random badges: each bubble gets 0-3 badge types randomly
+    // Assign random badges
     BUBBLES.forEach(b => {
         // ~60% chance of a due date
         if (Math.random() < 0.6) b.due = DUE_OPTIONS[Math.floor(Math.random() * DUE_OPTIONS.length)];
         // ~40% chance of a checklist
-        if (Math.random() < 0.4) b.checklist = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
-        // ~35% chance of a partner badge
-        if (Math.random() < 0.35) {
-            const pi = Math.floor(Math.random() * PARTNER_NAMES.length);
-            b.partner = PARTNER_NAMES[pi];
-            b.partnerColor = PARTNER_COLORS[pi];
-            b.shareDir = SHARE_DIRECTIONS[Math.floor(Math.random() * 2)];
+        if (Math.random() < 0.4) {
+            const cl = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
+            b.checklist = cl;
+        }
+        // ~30% chance of a partner (tagged) — shown top-left
+        // ~25% chance of a sender (received) — shown bottom-left
+        // Mutually exclusive: a bubble is either yours with a tagged partner, or received from a sender
+        const shareRoll = Math.random();
+        if (shareRoll < 0.3) {
+            b.taggedPartner = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
+        } else if (shareRoll < 0.55) {
+            b.sender = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
         }
     });
 
@@ -618,25 +629,53 @@
             index: index,
         };
 
-        // Build badges HTML
+        // Build badges HTML — positioned on circumference like iOS app
         let badgesHTML = '';
-        // Due date badge (top center)
+        const r = radius;
+        const badgeScale = Math.min(1.4, Math.max(0.8, data.size / 100));
+
+        // Due date badge: above bubble, centered, offset by radius + 8
         if (data.due) {
             let dueClass = 'future';
-            if (data.due === 'Overdue') dueClass = 'overdue';
-            else if (data.due === 'Today') dueClass = 'today';
+            let icon = '';
+            if (data.due === 'Overdue') { dueClass = 'overdue'; icon = '⚠ '; }
+            else if (data.due === 'Today') { dueClass = 'today'; icon = '⏱ '; }
             else if (data.due === 'Tomorrow') dueClass = 'tomorrow';
-            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}">${data.due}</div>`;
+            const dueTop = -(8 * badgeScale);
+            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}" style="top:${dueTop}px;font-size:${Math.round(9 * badgeScale)}px;">${icon}${data.due}</div>`;
         }
-        // Checklist badge (bottom center)
+
+        // Checklist badge: bottom-right at 45° on circumference
         if (data.checklist) {
-            badgesHTML += `<div class="bubble-badge badge-checklist">&#9745; ${data.checklist}</div>`;
+            const angle = Math.PI / 4; // 45 degrees
+            const cx = r + Math.cos(angle) * r;
+            const cy = r + Math.sin(angle) * r;
+            const isComplete = data.checklist.done === data.checklist.total;
+            const clsExtra = isComplete ? ' complete' : '';
+            const sz = Math.round(9 * badgeScale);
+            badgesHTML += `<div class="bubble-badge badge-checklist${clsExtra}" style="left:${cx}px;top:${cy}px;transform:translate(-50%,-50%);font-size:${sz}px;">&#9745; ${data.checklist.done}/${data.checklist.total}</div>`;
         }
-        // Partner badge (bottom right)
-        if (data.partner) {
-            const initial = data.partner[0];
-            const icon = data.shareDir === 'received' ? '&#8592;' : '&#8594;';
-            badgesHTML += `<div class="bubble-badge badge-partner"><span class="partner-avatar" style="background:${data.partnerColor}">${initial}</span>${icon} ${data.partner}</div>`;
+
+        // Tagged partner avatar: top-left at -135° on circumference
+        if (data.taggedPartner) {
+            const angle = -Math.PI * 3 / 4; // -135 degrees (top-left)
+            const cx = r + Math.cos(angle) * r;
+            const cy = r + Math.sin(angle) * r;
+            const avSize = Math.round(22 * badgeScale);
+            const initial = data.taggedPartner[0];
+            const fs = Math.round(avSize * 0.4);
+            badgesHTML += `<div class="bubble-badge badge-avatar" style="left:${cx}px;top:${cy}px;width:${avSize}px;height:${avSize}px;transform:translate(-50%,-50%);font-size:${fs}px;">${initial}</div>`;
+        }
+
+        // Sender avatar: bottom-left at 135° on circumference
+        if (data.sender) {
+            const angle = Math.PI * 3 / 4; // 135 degrees (bottom-left)
+            const cx = r + Math.cos(angle) * r;
+            const cy = r + Math.sin(angle) * r;
+            const avSize = Math.round(24 * badgeScale);
+            const initial = data.sender[0];
+            const fs = Math.round(avSize * 0.4);
+            badgesHTML += `<div class="bubble-badge badge-avatar" style="left:${cx}px;top:${cy}px;width:${avSize}px;height:${avSize}px;transform:translate(-50%,-50%);font-size:${fs}px;">${initial}</div>`;
         }
 
         // Progress ring SVG
@@ -691,7 +730,7 @@
         }
 
         function onDown(e) {
-            if (!poppable || state.popping) return;
+            if (state.popping) return;
             e.preventDefault();
             const p = getPos(e);
             startX = p.x; startY = p.y;
@@ -701,7 +740,8 @@
             lastDragX = p.x; lastDragY = p.y;
             prevDragX = p.x; prevDragY = p.y;
             el.style.zIndex = '10';
-            startHold();
+            // Only start hold-to-pop for poppable bubbles
+            if (poppable) startHold();
         }
 
         function onMove(e) {
@@ -719,6 +759,30 @@
             ny = Math.max(0, Math.min(cr.height - data.size, ny));
             state.x = nx;
             state.y = ny;
+
+            // Apply obstacle collision during drag so bubble slides along edge
+            const obstRect = getObstacleRect();
+            const bcx = state.x + state.radius;
+            const bcy = state.y + state.radius;
+            const nearX = Math.max(obstRect.left, Math.min(bcx, obstRect.right));
+            const nearY = Math.max(obstRect.top, Math.min(bcy, obstRect.bottom));
+            const ddx = bcx - nearX, ddy = bcy - nearY;
+            const dd = Math.sqrt(ddx * ddx + ddy * ddy);
+            if (dd < state.radius && dd > 0.001) {
+                const ovl = state.radius - dd;
+                state.x += (ddx / dd) * (ovl + 2);
+                state.y += (ddy / dd) * (ovl + 2);
+            } else if (dd === 0) {
+                // Center inside obstacle, push to nearest edge
+                const dL = bcx - obstRect.left, dR = obstRect.right - bcx;
+                const dT = bcy - obstRect.top, dB = obstRect.bottom - bcy;
+                const mn = Math.min(dL, dR, dT, dB);
+                if (mn === dL) state.x -= dL + state.radius + 2;
+                else if (mn === dR) state.x += dR + state.radius + 2;
+                else if (mn === dT) state.y -= dT + state.radius + 2;
+                else state.y += dB + state.radius + 2;
+            }
+
             // Track velocity for throw
             prevDragX = lastDragX; prevDragY = lastDragY;
             lastDragX = p.x; lastDragY = p.y;
@@ -735,17 +799,17 @@
                 const throwVy = (lastDragY - prevDragY) * PHYSICS.dragThrowMultiplier;
                 const speed = Math.sqrt(throwVx * throwVx + throwVy * throwVy);
                 if (speed > PHYSICS.maxVelocity) {
-                    const scale = PHYSICS.maxVelocity / speed;
-                    state.vx = throwVx * scale;
-                    state.vy = throwVy * scale;
+                    const sc = PHYSICS.maxVelocity / speed;
+                    state.vx = throwVx * sc;
+                    state.vy = throwVy * sc;
                 } else {
                     state.vx = throwVx;
                     state.vy = throwVy;
                 }
-                // Update anchor to release position
-                state.anchorX = state.x;
-                state.anchorY = state.y;
             }
+            // Always update anchor to current position (prevents snapping back)
+            state.anchorX = state.x;
+            state.anchorY = state.y;
         }
 
         el.addEventListener('mousedown', onDown);
