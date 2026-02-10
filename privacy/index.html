@@ -104,20 +104,20 @@
 
     <div class="content">
         <h1>Privacy Policy</h1>
-        <p class="last-updated">Last updated: 9 February 2026</p>
+        <p class="last-updated">Last updated: 10 February 2026</p>
 
-        <p>Bubbl ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application ("Bubbl" or the "App").</p>
+        <p>Bubbl ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share your information when you use the Bubbl iOS application ("the App"). By using Bubbl, you agree to the practices described in this policy.</p>
 
         <h2>1. Information We Collect</h2>
 
         <h3>Account Information</h3>
         <p>When you create an account, we collect:</p>
         <ul>
-            <li><strong>Email address</strong> - used for account creation and communication</li>
-            <li><strong>Display name</strong> - shown in the app and to Co-Pop partners</li>
-            <li><strong>Profile photo</strong> - optional, stored securely</li>
+            <li><strong>Email address</strong> &ndash; used for account creation and communication</li>
+            <li><strong>Display name</strong> &ndash; shown in the App and to Co-Pop partners</li>
+            <li><strong>Profile photo</strong> &ndash; optional, stored securely</li>
         </ul>
-        <p>You may sign in using Apple Sign-In, Google Sign-In, or email/password. When using third-party sign-in, we receive only your name and email address as authorised by you.</p>
+        <p>You may sign in using Apple Sign-In, Google Sign-In, or email/password. When using third-party sign-in, we receive only your name and email address as authorised by you. We do not access your Apple or Google account passwords.</p>
 
         <h3>User Content</h3>
         <p>We store the content you create within the App:</p>
@@ -125,44 +125,51 @@
             <li>Bubble titles, notes, and checklist items</li>
             <li>Categories and their customisations</li>
             <li>Due dates and reminder settings</li>
-            <li>Photos and attachments added to bubbles (compressed and stored securely)</li>
+            <li>Photos attached to bubbles and checklist items (compressed and stored as encoded image data within your cloud database)</li>
+            <li>File attachments and their thumbnails</li>
         </ul>
+        <p>When you share a bubble with a Co-Pop partner, all content within that bubble &mdash; including attached photos and checklist items &mdash; is included in the shared data and visible to your partner.</p>
 
         <h3>Voice Data</h3>
         <p>When you use the voice input feature:</p>
         <ul>
-            <li>Audio is recorded on your device</li>
-            <li>Recordings are sent to our secure cloud service for transcription</li>
-            <li>We use OpenAI's Whisper API (via Firebase Cloud Functions) to transcribe your voice</li>
-            <li><strong>Audio recordings are deleted immediately after transcription</strong> - we do not store your voice recordings</li>
-            <li>Only the resulting text transcription is saved as part of your bubble content</li>
+            <li>Audio is recorded locally on your device</li>
+            <li>Recordings are sent to our secure backend (Firebase Cloud Functions), which forwards them to OpenAI's Whisper API for transcription</li>
+            <li><strong>Audio recordings are deleted immediately after transcription</strong> &ndash; we do not store your voice recordings</li>
+            <li>The resulting text transcription may also be processed by OpenAI's language model (GPT) to extract checklist items or generate a concise title from your speech</li>
+            <li>Only the final text (title, notes, or checklist items) is retained as part of your bubble content</li>
         </ul>
 
-        <h3>Usage Data</h3>
-        <p>We collect anonymous usage statistics to improve the App:</p>
+        <h3>Usage Analytics</h3>
+        <p>We collect analytics to improve the App:</p>
         <ul>
-            <li>Number of bubbles created and completed</li>
-            <li>Completion streaks</li>
-            <li>App crash reports (via Firebase Crashlytics)</li>
+            <li>App usage events (e.g., bubbles created, completed, shared) linked to your account identifier</li>
+            <li>Subscription status</li>
+            <li>Crash reports with diagnostic context (e.g., bubble count, partner count, premium status)</li>
         </ul>
+        <p>Analytics data is processed by Firebase Analytics and Firebase Crashlytics (Google). Your account identifier is associated with analytics events to help us understand usage patterns and diagnose issues. We do not sell or share this data with third parties for advertising purposes.</p>
 
         <h3>Device Information</h3>
         <p>We collect limited device information for functionality:</p>
         <ul>
-            <li>Push notification tokens (to deliver reminders)</li>
-            <li>Device type (for crash reporting only)</li>
+            <li><strong>Push notification tokens</strong> &ndash; stored in your account to deliver notifications to your device, updated on each app launch</li>
+            <li><strong>Device type and OS version</strong> &ndash; included automatically in crash reports</li>
         </ul>
+
+        <h3>Aggregate Statistics</h3>
+        <p>When you complete (pop) a bubble, we record an anonymous event containing only the category and timestamp. No user identifier is attached to these events. This data is used solely to display community-wide statistics within the App.</p>
 
         <h2>2. How We Use Your Information</h2>
         <p>We use your information to:</p>
         <ul>
-            <li>Provide and maintain the App's functionality</li>
-            <li>Sync your bubbles across your devices</li>
-            <li>Enable Co-Pop features (sharing bubbles with partners)</li>
-            <li>Send you push notifications for reminders you set</li>
-            <li>Process voice input into text</li>
-            <li>Manage your subscription through our payment processor</li>
-            <li>Improve the App based on aggregate, anonymised usage patterns</li>
+            <li>Provide and maintain the App's core functionality</li>
+            <li>Sync your bubbles across your devices via cloud storage</li>
+            <li>Enable Co-Pop partner sharing features</li>
+            <li>Send you push notifications for reminders, sharing requests, and partner activity</li>
+            <li>Process voice input into text via our secure backend</li>
+            <li>Manage your subscription through Apple's payment system</li>
+            <li>Analyse usage patterns to improve the App</li>
+            <li>Diagnose crashes and technical issues</li>
             <li>Respond to your support requests</li>
         </ul>
 
@@ -170,48 +177,55 @@
         <p>We do <strong>not</strong> sell your personal information. We share data only in these limited circumstances:</p>
 
         <h3>Co-Pop Partners</h3>
-        <p>When you share a bubble with a partner, they can see that bubble's title, notes, category, due date, and checklist items. Partners can only see bubbles you specifically choose to share.</p>
+        <p>When you share a bubble with a partner, they can see that bubble's content, including its title, notes, due date, checklist items, and any attached photos. Partners can only access content you have explicitly chosen to share. You can revoke sharing at any time.</p>
 
         <h3>Third-Party Service Providers</h3>
         <p>We use the following services to operate the App:</p>
         <ul>
-            <li><strong>Firebase (Google)</strong> - authentication, cloud database, file storage, push notifications, crash reporting, and analytics. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy Policy</a></li>
-            <li><strong>RevenueCat</strong> - subscription and in-app purchase management. RevenueCat processes transaction data through Apple's App Store. <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat Privacy Policy</a></li>
-            <li><strong>OpenAI</strong> - voice transcription via the Whisper API. Audio is processed and immediately discarded. <a href="https://openai.com/privacy" target="_blank" rel="noopener">OpenAI Privacy Policy</a></li>
+            <li><strong>Firebase (Google)</strong> &ndash; authentication, cloud database, push notifications, crash reporting, and analytics. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy Policy</a></li>
+            <li><strong>RevenueCat</strong> &ndash; subscription and in-app purchase management. RevenueCat processes transaction data through Apple's App Store. <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat Privacy Policy</a></li>
+            <li><strong>OpenAI</strong> &ndash; voice transcription (Whisper API) and text processing (GPT) for checklist extraction and title generation. Audio is processed and immediately discarded. Text is processed and not retained by OpenAI. <a href="https://openai.com/privacy" target="_blank" rel="noopener">OpenAI Privacy Policy</a></li>
         </ul>
+        <p>We do not use your content for advertising, training AI models, or any purpose unrelated to delivering the service.</p>
 
         <h2>4. Data Storage and Security</h2>
-        <p>Your data is stored in Firebase Cloud Firestore and Firebase Storage, hosted on Google Cloud infrastructure. All data is encrypted in transit (TLS/SSL) and at rest.</p>
-        <p>Profile photos are compressed before upload (approximately 200KB). Attachments are stored securely in Firebase Storage linked to your account.</p>
+        <p>Your data is stored in Google Cloud Firestore, hosted on Google Cloud infrastructure. All data is encrypted in transit (TLS/SSL) and at rest.</p>
+        <p>Photos attached to bubbles and checklist items are stored as compressed, encoded image data within your Firestore documents. Voice audio is transmitted to our backend over HTTPS and deleted immediately after processing.</p>
 
         <h2>5. Data Retention</h2>
         <ul>
-            <li><strong>Account data</strong> - retained until you delete your account</li>
-            <li><strong>Bubble content</strong> - retained until you delete individual bubbles or your account</li>
-            <li><strong>Voice recordings</strong> - deleted immediately after transcription (not retained)</li>
-            <li><strong>Pairing codes</strong> - automatically expire after 15 minutes</li>
-            <li><strong>Crash reports</strong> - retained for 90 days</li>
+            <li><strong>Account data</strong> &ndash; retained until you delete your account</li>
+            <li><strong>Bubble content</strong> &ndash; retained until you delete individual bubbles or your account</li>
+            <li><strong>Voice recordings</strong> &ndash; deleted immediately after transcription (not retained)</li>
+            <li><strong>Text transcriptions</strong> &ndash; retained as part of your bubble content until deletion</li>
+            <li><strong>Pairing codes</strong> &ndash; automatically expire and are deleted after 15 minutes</li>
+            <li><strong>Crash reports</strong> &ndash; retained for 90 days</li>
+            <li><strong>Analytics events</strong> &ndash; retained as per Google's Firebase retention policies</li>
+            <li><strong>Push notification tokens</strong> &ndash; updated on each app launch; removed on account deletion</li>
+            <li><strong>Aggregate pop statistics</strong> &ndash; retained indefinitely (no personal data attached)</li>
         </ul>
 
         <h2>6. Your Rights</h2>
         <p>You have the right to:</p>
         <ul>
-            <li><strong>Access</strong> your data - all your content is visible within the App</li>
+            <li><strong>Access</strong> your data &ndash; all your content is visible within the App</li>
             <li><strong>Delete</strong> your account and all associated data through the App's settings</li>
             <li><strong>Correct</strong> your profile information at any time</li>
             <li><strong>Opt out</strong> of push notifications through your device settings</li>
             <li><strong>Revoke</strong> microphone, camera, or photo library permissions through your device settings</li>
+            <li><strong>Unshare</strong> any bubble you've shared with a partner, revoking their access</li>
         </ul>
-        <p>When you delete your account, we remove all your data from our servers, including your profile, all bubbles, categories, shared bubble links, and any stored attachments.</p>
+        <p>When you delete your account, we remove all your data from our servers, including your profile, all bubbles, categories, shared bubble links, push notification tokens, and any stored attachments.</p>
+        <p>To request a copy of your data or ask questions about your privacy, contact us at <a href="mailto:support@bubblapp.com">support@bubblapp.com</a>.</p>
 
         <h2>7. Children's Privacy</h2>
-        <p>Bubbl is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us at <a href="mailto:support@bubblapp.com">support@bubblapp.com</a> and we will delete it.</p>
+        <p>Bubbl is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us at <a href="mailto:support@bubblapp.com">support@bubblapp.com</a> and we will delete it promptly.</p>
 
         <h2>8. Cookies and Tracking</h2>
-        <p>The Bubbl app does not use cookies or tracking technologies. We do not track you across other apps or websites. Our analytics are limited to anonymous, aggregate usage statistics.</p>
+        <p>Bubbl does not use cookies, web beacons, or cross-app tracking technologies. We do not participate in advertising networks or share data for targeted advertising.</p>
 
         <h2>9. Changes to This Policy</h2>
-        <p>We may update this Privacy Policy from time to time. We will notify you of significant changes through the App or via email. Your continued use of the App after changes constitutes acceptance of the updated policy.</p>
+        <p>We may update this Privacy Policy from time to time. If we make material changes, we will notify you through the App or via email. Your continued use of Bubbl after changes are posted constitutes acceptance of the updated policy.</p>
 
         <h2>10. Contact Us</h2>
         <p>If you have questions about this Privacy Policy or your data, contact us at:</p>
