@@ -297,49 +297,6 @@
         }
         .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
 
-        /* Video showcase */
-        .video-showcase {
-            position: relative; z-index: 2; margin-top: 48px;
-            width: 100%; max-width: 340px;
-        }
-        .video-device {
-            position: relative; width: 100%; aspect-ratio: 886 / 1920;
-            border-radius: 40px; overflow: hidden;
-            background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.5);
-            box-shadow:
-                0 30px 80px rgba(91,141,239,0.12),
-                0 10px 30px rgba(0,0,0,0.06),
-                inset 0 1px 0 rgba(255,255,255,0.8),
-                inset 0 -1px 0 rgba(0,0,0,0.04);
-        }
-        .video-device video {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-            border-radius: 38px;
-        }
-        .video-device::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 38px; z-index: 2; pointer-events: none;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
-        }
-        .video-dots {
-            display: flex; gap: 8px; justify-content: center; margin-top: 16px;
-        }
-        .video-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--text-tertiary); cursor: pointer;
-            transition: all 0.3s; border: none; padding: 0;
-        }
-        .video-dot.active {
-            background: var(--blue); width: 24px; border-radius: 4px;
-        }
-        .video-fade-bottom {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.95));
-            z-index: 3; border-radius: 0 0 38px 38px; pointer-events: none;
-        }
-
         .pop-counter {
             position: relative; z-index: 2; margin-top: 40px; padding-top: 24px;
             border-top: 1px solid rgba(0,0,0,0.06); text-align: center;
@@ -470,19 +427,6 @@
                     Download for iOS
                 </a>
                 <a href="#features" class="btn-secondary">Learn More</a>
-            </div>
-            <div class="video-showcase">
-                <div class="video-device">
-                    <video id="showcaseVideo" autoplay muted playsinline>
-                        <source src="/videos/preview-1.mp4" type="video/mp4">
-                    </video>
-                    <div class="video-fade-bottom"></div>
-                </div>
-                <div class="video-dots">
-                    <button class="video-dot active" data-video="1"></button>
-                    <button class="video-dot" data-video="2"></button>
-                    <button class="video-dot" data-video="3"></button>
-                </div>
             </div>
             <div class="pop-counter">
                 <div class="pop-counter-value" id="popCounter">0</div>
@@ -1354,44 +1298,6 @@
         entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 80); obs.unobserve(e.target); } });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
-
-    // Video showcase — auto-cycle through 3 previews
-    (function() {
-        const video = document.getElementById('showcaseVideo');
-        const dots = document.querySelectorAll('.video-dot');
-        const videos = ['/videos/preview-1.mp4', '/videos/preview-2.mp4', '/videos/preview-3.mp4'];
-        let currentVideo = 0;
-        let cycleTimer = null;
-
-        function switchTo(idx) {
-            currentVideo = idx;
-            video.style.opacity = '0';
-            video.style.transition = 'opacity 0.4s';
-            setTimeout(() => {
-                video.src = videos[idx];
-                video.load();
-                video.play();
-                video.style.opacity = '1';
-            }, 400);
-            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-        }
-
-        function nextVideo() {
-            switchTo((currentVideo + 1) % videos.length);
-        }
-
-        // Auto-cycle when each video ends
-        video.addEventListener('ended', () => {
-            nextVideo();
-        });
-
-        // Dot clicks
-        dots.forEach((dot, i) => {
-            dot.addEventListener('click', () => {
-                switchTo(i);
-            });
-        });
-    })();
 
     // Mobile menu toggle
     function toggleMenu() {
