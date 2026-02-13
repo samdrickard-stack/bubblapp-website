@@ -37,18 +37,21 @@
         /* BUBBLE CANVAS                          */
         /* ═══════════════════════════════════════ */
         .bubble-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 5; overflow: hidden; pointer-events: none;
         }
+        .bubble-canvas .glossy-bubble { pointer-events: auto; }
 
         .glossy-bubble {
             position: absolute; border-radius: 50%;
             cursor: grab; user-select: none; -webkit-user-select: none;
             touch-action: none; z-index: 5;
             will-change: left, top, transform;
+            opacity: 0.85; transition: opacity 0.3s;
         }
-        .glossy-bubble:active { cursor: grabbing; }
-        .glossy-bubble.static-bubble { opacity: 0.8; filter: saturate(0.7); }
+        .glossy-bubble:hover { opacity: 1; }
+        .glossy-bubble:active { cursor: grabbing; opacity: 1; }
+        .glossy-bubble.static-bubble { opacity: 0.7; filter: saturate(0.7); }
 
         .bubble-sphere {
             width: 100%; height: 100%; border-radius: 50%;
@@ -244,9 +247,9 @@
         /* HERO                                   */
         /* ═══════════════════════════════════════ */
         .hero {
-            position: relative; min-height: 100vh;
+            position: relative;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 100px 24px 48px; z-index: 1;
+            text-align: center; padding: 140px 24px 60px; z-index: 1;
         }
         .hero-glow {
             position: absolute; width: 700px; height: 700px; border-radius: 50%;
@@ -297,18 +300,6 @@
         }
         .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
 
-        .pop-counter {
-            position: relative; z-index: 2; margin-top: 24px; padding-top: 16px;
-            border-top: 1px solid rgba(0,0,0,0.06); text-align: center;
-        }
-        .pop-counter-value {
-            font-size: 32px; font-weight: 800;
-            background: var(--gradient); -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent; background-clip: text;
-        }
-        .pop-counter-value.bump { animation: counterBump 0.3s ease; }
-        @keyframes counterBump { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        .pop-counter-label { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; font-weight: 500; }
 
         /* ═══════════════════════════════════════ */
         /* SECTIONS                               */
@@ -326,11 +317,11 @@
         .section-header .section-subtitle { margin: 0 auto; }
 
         .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .feature-card { padding: 32px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(20px); transition: all 0.3s; position: relative; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .feature-card { padding: 32px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(20px); transition: all 0.3s; position: relative; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; }
         .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent); opacity: 0; transition: opacity 0.3s; }
         .feature-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-4px); }
         .feature-card:hover::before { opacity: 1; }
-        .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
         .feature-icon svg { width: 48px; height: 48px; }
         .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
@@ -381,6 +372,29 @@
         .pro-table td:nth-child(2), .pro-table td:nth-child(3) { text-align: center; font-weight: 500; }
         .pro-table tr:last-child td { border-bottom: none; }
         .check { color: #4DC9A8; font-size: 18px; } .cross { color: var(--text-tertiary); font-size: 18px; }
+        .info-tip {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; border-radius: 50%; font-size: 11px; font-weight: 700;
+            font-style: italic; color: var(--text-tertiary); background: rgba(0,0,0,0.05);
+            cursor: help; position: relative; margin-left: 6px; vertical-align: middle;
+            transition: all 0.2s; user-select: none; line-height: 1;
+        }
+        .info-tip:hover { background: var(--blue); color: white; }
+        .info-tip:hover::after {
+            content: attr(data-tip);
+            position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+            background: var(--text-primary); color: white; font-size: 12px; font-weight: 400;
+            font-style: normal; padding: 10px 14px; border-radius: 10px; white-space: normal;
+            width: 240px; line-height: 1.5; z-index: 10;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            animation: tooltipIn 0.2s ease;
+        }
+        .info-tip:hover::before {
+            content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent; border-top-color: var(--text-primary); z-index: 10;
+        }
+        @keyframes tooltipIn { from { opacity: 0; transform: translateX(-50%) translateY(4px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         .pro-cta { text-align: center; margin-top: 32px; }
 
         footer { position: relative; z-index: 1; padding: 48px 24px 32px; border-top: 1px solid var(--border); }
@@ -437,9 +451,10 @@
         <a href="https://apps.apple.com/app/id6758945006" class="nav-cta" target="_blank" rel="noopener">Download</a>
     </div>
 
+    <div class="bubble-canvas" id="heroCanvas"></div>
+
     <section class="hero">
         <div class="hero-glow"></div>
-        <div class="bubble-canvas" id="heroCanvas"></div>
         <div class="hero-content">
             <div class="hero-badge"><span class="hero-badge-dot"></span> Available on iOS</div>
             <h1>Make doing life,<br><span>lighter.</span></h1>
@@ -450,10 +465,6 @@
                     Download for iOS
                 </a>
                 <a href="#how-it-works" class="btn-secondary">Learn More</a>
-            </div>
-            <div class="pop-counter">
-                <div class="pop-counter-value" id="popCounter">0</div>
-                <div class="pop-counter-label">bubbles popped</div>
             </div>
         </div>
     </section>
@@ -513,13 +524,13 @@
                 <table class="pro-table">
                     <thead><tr><th>Feature</th><th>Free</th><th class="pro-header">Bubbl+</th></tr></thead>
                     <tbody>
-                        <tr><td>Voice Bubbles</td><td>2 / day</td><td>20 / day</td></tr>
-                        <tr><td>Co-Pop Partners</td><td>1</td><td>Unlimited</td></tr>
-                        <tr><td>Shared Bubbles</td><td>3 at once</td><td>Unlimited</td></tr>
-                        <tr><td>Custom Categories</td><td><span class="cross">&#10005;</span></td><td><span class="check">&#10003;</span></td></tr>
-                        <tr><td>Custom Backgrounds</td><td><span class="cross">&#10005;</span></td><td><span class="check">&#10003;</span></td></tr>
-                        <tr><td>Bubble Canvas</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td></tr>
-                        <tr><td>Smart Reminders</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td></tr>
+                        <tr><td>Voice Bubbles <span class="info-tip" data-tip="Create bubbles by speaking. Your voice is transcribed into tasks with smart date and list detection.">i</span></td><td>2 / day</td><td>20 / day</td></tr>
+                        <tr><td>Co-Pop Partners <span class="info-tip" data-tip="Pair with people you share life with — partners, housemates, family. Send and receive bubbles together.">i</span></td><td>1</td><td>Up to 10</td></tr>
+                        <tr><td>Shared Bubbles <span class="info-tip" data-tip="Active bubbles shared between you and your partners. Unsharing or popping a bubble frees up a slot.">i</span></td><td>3 active</td><td>30 active</td></tr>
+                        <tr><td>Custom Categories <span class="info-tip" data-tip="Create your own colour-coded categories beyond the defaults to organise bubbles your way.">i</span></td><td><span class="cross">&#10005;</span></td><td><span class="check">&#10003;</span></td></tr>
+                        <tr><td>Custom Backgrounds <span class="info-tip" data-tip="Personalise your bubble canvas with beautiful background themes.">i</span></td><td><span class="cross">&#10005;</span></td><td><span class="check">&#10003;</span></td></tr>
+                        <tr><td>Bubble Canvas <span class="info-tip" data-tip="Your main view — a floating canvas of all your bubbles, organised visually and easy to interact with.">i</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td></tr>
+                        <tr><td>Smart Reminders <span class="info-tip" data-tip="Set date and time reminders on any bubble. Bubbles grow as their due date approaches so nothing gets missed.">i</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -678,10 +689,9 @@
         el.style.width = data.size + 'px';
         el.style.height = data.size + 'px';
 
-        // Convert percentage to pixel position
-        const canvasRect = canvas.getBoundingClientRect();
-        const px = (data.x / 100) * canvasRect.width;
-        const py = (data.y / 100) * canvasRect.height;
+        // Convert percentage to pixel position (viewport)
+        const px = (data.x / 100) * window.innerWidth;
+        const py = (data.y / 100) * window.innerHeight;
 
         el.style.left = px + 'px';
         el.style.top = py + 'px';
@@ -846,35 +856,11 @@
                 dragMoved = true;
                 cancelHold();
             }
-            const cr = canvas.getBoundingClientRect();
             let nx = origX + dx, ny = origY + dy;
-            nx = Math.max(5, Math.min(cr.width - data.size - 5, nx));
-            ny = Math.max(15, Math.min(cr.height - data.size - 10, ny));
+            nx = Math.max(5, Math.min(window.innerWidth - data.size - 5, nx));
+            ny = Math.max(15, Math.min(window.innerHeight - data.size - 10, ny));
             state.x = nx;
             state.y = ny;
-
-            // Apply obstacle collision during drag so bubble slides along edge
-            const obstRect = getObstacleRect();
-            const bcx = state.x + state.radius;
-            const bcy = state.y + state.radius;
-            const nearX = Math.max(obstRect.left, Math.min(bcx, obstRect.right));
-            const nearY = Math.max(obstRect.top, Math.min(bcy, obstRect.bottom));
-            const ddx = bcx - nearX, ddy = bcy - nearY;
-            const dd = Math.sqrt(ddx * ddx + ddy * ddy);
-            if (dd < state.radius && dd > 0.001) {
-                const ovl = state.radius - dd;
-                state.x += (ddx / dd) * (ovl + 2);
-                state.y += (ddy / dd) * (ovl + 2);
-            } else if (dd === 0) {
-                // Center inside obstacle, push to nearest edge
-                const dL = bcx - obstRect.left, dR = obstRect.right - bcx;
-                const dT = bcy - obstRect.top, dB = obstRect.bottom - bcy;
-                const mn = Math.min(dL, dR, dT, dB);
-                if (mn === dL) state.x -= dL + state.radius + 2;
-                else if (mn === dR) state.x += dR + state.radius + 2;
-                else if (mn === dT) state.y -= dT + state.radius + 2;
-                else state.y += dB + state.radius + 2;
-            }
 
             // Track velocity for throw
             prevDragX = lastDragX; prevDragY = lastDragY;
@@ -1001,10 +987,8 @@
     // PHYSICS ENGINE (60fps loop)
     // ═══════════════════════════════════════════════════
     function physicsStep() {
-        const canvasRect = canvas.getBoundingClientRect();
-        const cw = canvasRect.width;
-        const ch = canvasRect.height;
-        const obstacleRect = getObstacleRect();
+        const cw = window.innerWidth;
+        const ch = window.innerHeight;
 
         for (let i = 0; i < bubbleStates.length; i++) {
             const s = bubbleStates[i];
@@ -1066,9 +1050,6 @@
                 s.vy = -Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3;
                 s.anchorY = Math.min(ch - s.radius * 0.5 - padBot, s.anchorY);
             }
-
-            // ── Hero content obstacle collision ──
-            resolveCircleRect(s, obstacleRect);
 
             // ── Squish spring-back ──
             const squishDx = 1.0 - s.squishX;
@@ -1233,11 +1214,6 @@
         }
 
         popCount++;
-        const counter = document.getElementById('popCounter');
-        counter.textContent = popCount;
-        counter.classList.remove('bump');
-        void counter.offsetWidth;
-        counter.classList.add('bump');
 
         // Remove from physics and respawn as fully poppable (on repeat)
         setTimeout(() => {
@@ -1284,32 +1260,32 @@
     // ═══════════════════════════════════════════════════
     let lastCanvasWidth = 0, lastCanvasHeight = 0;
     function handleResize() {
-        const cr = canvas.getBoundingClientRect();
+        const w = window.innerWidth;
+        const h = window.innerHeight;
         if (lastCanvasWidth === 0) {
-            lastCanvasWidth = cr.width;
-            lastCanvasHeight = cr.height;
+            lastCanvasWidth = w;
+            lastCanvasHeight = h;
             return;
         }
-        const scaleX = cr.width / lastCanvasWidth;
-        const scaleY = cr.height / lastCanvasHeight;
+        const scaleX = w / lastCanvasWidth;
+        const scaleY = h / lastCanvasHeight;
         for (const s of bubbleStates) {
             s.x *= scaleX;
             s.y *= scaleY;
             s.anchorX *= scaleX;
             s.anchorY *= scaleY;
         }
-        lastCanvasWidth = cr.width;
-        lastCanvasHeight = cr.height;
+        lastCanvasWidth = w;
+        lastCanvasHeight = h;
     }
     window.addEventListener('resize', handleResize);
 
     // Init bubbles
     BUBBLES.forEach((d, i) => createBubble(d, i, true));
 
-    // Store initial canvas size and start physics
-    const initRect = canvas.getBoundingClientRect();
-    lastCanvasWidth = initRect.width;
-    lastCanvasHeight = initRect.height;
+    // Store initial size and start physics
+    lastCanvasWidth = window.innerWidth;
+    lastCanvasHeight = window.innerHeight;
     requestAnimationFrame(physicsStep);
 
     // Background bubbles (decorative, no physics)
