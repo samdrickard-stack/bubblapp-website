@@ -103,8 +103,9 @@
             position: absolute; pointer-events: none;
             white-space: nowrap;
         }
-        /* Due date: top-left at 225° on circumference */
+        /* Due date: top-center, sits behind bubble (matches iOS app) */
         .badge-due {
+            left: 50%; transform: translateX(-50%);
             padding: 3px 8px; border-radius: 10px;
             font-size: 9px; font-weight: 600; color: white;
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -300,8 +301,22 @@
         /* ═══════════════════════════════════════ */
         /* SECTIONS                               */
         /* ═══════════════════════════════════════ */
-        section { position: relative; z-index: 1; padding: 80px 24px; }
-        .section-container { max-width: 1200px; margin: 0 auto; }
+        section { position: relative; z-index: 1; padding: 80px 24px; overflow: hidden; }
+        .section-container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+        .section-bubble-canvas {
+            opacity: 0; transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        .section-bubble-canvas.active {
+            opacity: 1; pointer-events: auto;
+        }
+        .section-bubble-canvas .glossy-bubble {
+            opacity: 0.5; filter: saturate(0.6);
+            pointer-events: auto;
+        }
+        .section-bubble-canvas .glossy-bubble:hover {
+            opacity: 0.7;
+        }
         .section-label { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--blue); margin-bottom: 16px; }
         .section-title { font-size: clamp(32px,5vw,48px); font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 20px; color: var(--text-primary); }
         .section-title span {
@@ -465,6 +480,7 @@
     </section>
 
     <section class="how-it-works" id="how-it-works">
+        <div class="bubble-canvas section-bubble-canvas" data-section="how-it-works"></div>
         <div class="section-container">
             <div class="section-header fade-in">
                 <div class="section-label">How It Works</div>
@@ -489,6 +505,7 @@
     </section>
 
     <section id="features">
+        <div class="bubble-canvas section-bubble-canvas" data-section="features"></div>
         <div class="section-container">
             <div class="section-header fade-in">
                 <div class="section-label">Features</div>
@@ -509,6 +526,7 @@
     </section>
 
     <section class="pro-section" id="plus">
+        <div class="bubble-canvas section-bubble-canvas" data-section="plus"></div>
         <div class="section-container">
             <div class="section-header fade-in">
                 <div class="section-label">Bubbl+</div>
@@ -705,18 +723,16 @@
         const r = radius;
         const badgeScale = Math.min(1.4, Math.max(0.8, data.size / 100));
 
-        // Due date badge: top-left at 225° (5π/4) on circumference — matches app
+        // Due date badge: top-center, sits behind the bubble (matches iOS app)
         if (data.due) {
             let dueClass = 'future';
             let icon = '';
             if (data.due === 'Overdue') { dueClass = 'overdue'; icon = '⚠ '; }
             else if (data.due === 'Today') { dueClass = 'today'; icon = '⏱ '; }
             else if (data.due === 'Tomorrow') dueClass = 'tomorrow';
-            const angle = Math.PI * 5 / 4; // 225 degrees (top-left)
-            const cx = r + Math.cos(angle) * r;
-            const cy = r + Math.sin(angle) * r;
+            const dueTop = -(8 * badgeScale);
             const sz = Math.round(9 * badgeScale);
-            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}" style="left:${cx}px;top:${cy}px;transform:translate(-50%,-50%);font-size:${sz}px;">${icon}${data.due}</div>`;
+            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}" style="top:${dueTop}px;font-size:${sz}px;">${icon}${data.due}</div>`;
         }
 
         // Checklist badge: bottom-right at 45° (π/4) on circumference — matches app
@@ -1278,6 +1294,352 @@
     document.querySelectorAll('a[href^="#"]').forEach(a => {
         a.addEventListener('click', function(e) { e.preventDefault(); const t = document.querySelector(this.getAttribute('href')); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     });
+
+    // ═══════════════════════════════════════════════════
+    // SECTION BUBBLES — appear/disappear as user scrolls
+    // ═══════════════════════════════════════════════════
+    const SECTION_BUBBLE_SETS = {
+        'how-it-works': [
+            { label: 'Speak it', color: '#00D4FF', size: 65, x: 2, y: 15 },
+            { label: 'Share it', color: '#9B59B6', size: 60, x: 90, y: 20 },
+            { label: 'Pop it', color: '#4DC9A8', size: 55, x: 3, y: 70 },
+            { label: 'Done!', color: '#FFD166', size: 50, x: 92, y: 65 },
+            { label: '🎉', color: '#E056A0', size: 45, x: 88, y: 85 },
+        ],
+        'features': [
+            { label: 'Voice', color: '#00D4FF', size: 60, x: 1, y: 8 },
+            { label: 'Reminders', color: '#5B8DEF', size: 55, x: 92, y: 12 },
+            { label: 'Categories', color: '#FF8E53', size: 50, x: 2, y: 45 },
+            { label: 'Widget', color: '#9B59B6', size: 55, x: 93, y: 50 },
+            { label: 'Stats', color: '#B829DD', size: 48, x: 1, y: 82 },
+            { label: 'Checklists', color: '#4CAF50', size: 52, x: 91, y: 85 },
+        ],
+        'plus': [
+            { label: 'Upgrade', color: '#5B8DEF', size: 60, x: 2, y: 12 },
+            { label: 'Pro', color: '#B829DD', size: 55, x: 91, y: 18 },
+            { label: 'More', color: '#9B59B6', size: 50, x: 3, y: 70 },
+            { label: '⭐', color: '#FFD166', size: 45, x: 92, y: 72 },
+        ],
+    };
+
+    // Track each section's bubble state
+    const sectionBubbleEngines = {};
+
+    function createSectionBubble(data, index, canvasEl) {
+        const el = document.createElement('div');
+        el.className = 'glossy-bubble';
+        el.style.width = data.size + 'px';
+        el.style.height = data.size + 'px';
+
+        const canvasRect = canvasEl.getBoundingClientRect();
+        const px = (data.x / 100) * canvasRect.width;
+        const py = (data.y / 100) * canvasRect.height;
+
+        el.style.left = px + 'px';
+        el.style.top = py + 'px';
+        el.style.opacity = '0';
+        setTimeout(() => { el.style.transition = 'opacity 0.5s'; el.style.opacity = ''; }, 100 + index * 150);
+
+        const textLen = data.label.length;
+        let fontSize;
+        if (textLen <= 3) fontSize = data.size / 4;
+        else if (textLen <= 8) fontSize = data.size / 6;
+        else fontSize = data.size / 7.5;
+        fontSize = Math.max(9, Math.min(15, fontSize));
+        const radius = data.size / 2;
+
+        const state = {
+            el: el, data: data, x: px, y: py, vx: 0, vy: 0,
+            radius: radius, mass: radius * radius * 0.01,
+            anchorX: px, anchorY: py,
+            orbitAngle: Math.random() * Math.PI * 2,
+            orbitSpeedMult: 0.7 + Math.random() * 0.6,
+            squishX: 1, squishY: 1, squishVX: 0, squishVY: 0,
+            isDragging: false, poppable: true, popping: false,
+            index: index, canvas: canvasEl,
+        };
+
+        el.innerHTML = `
+            <svg class="pop-ring" width="${data.size + 6}" height="${data.size + 6}" viewBox="0 0 ${data.size + 6} ${data.size + 6}">
+                <circle cx="${(data.size + 6) / 2}" cy="${(data.size + 6) / 2}" r="${(data.size + 6) / 2 - 3}"
+                    stroke-dasharray="${2 * Math.PI * ((data.size + 6) / 2 - 3)}" stroke-dashoffset="${2 * Math.PI * ((data.size + 6) / 2 - 3)}" />
+            </svg>
+            <div class="bubble-sphere">
+                <div class="bubble-base" style="background: radial-gradient(circle at 35% 35%, ${lighten(data.color, 30)}, ${data.color} 60%, ${darken(data.color, 20)} 100%);"></div>
+                <div class="bubble-highlight"></div>
+                <div class="bubble-highlight-2"></div>
+                <div class="bubble-rim"></div>
+                <div class="bubble-glow" style="background:${data.color};"></div>
+                <div class="bubble-label" style="font-size:${fontSize}px;">${data.label}</div>
+            </div>
+        `;
+
+        // Drag + hold logic for section bubbles
+        let startX, startY, origX, origY, dragMoved = false;
+        let holdTimer = null;
+        let lastDragX = 0, lastDragY = 0, prevDragX = 0, prevDragY = 0;
+
+        function getPos(e) {
+            const p = e.touches ? e.touches[0] : e;
+            return { x: p.clientX, y: p.clientY };
+        }
+
+        function startHold() {
+            const circle = el.querySelector('.pop-ring circle');
+            circle.style.transition = `stroke-dashoffset ${HOLD_DURATION}ms linear`;
+            circle.style.strokeDashoffset = '0';
+            holdTimer = setTimeout(() => {
+                if (!dragMoved) popSectionBubble(state);
+            }, HOLD_DURATION);
+        }
+
+        function cancelHold() {
+            clearTimeout(holdTimer); holdTimer = null;
+            const circle = el.querySelector('.pop-ring circle');
+            if (circle) {
+                circle.style.transition = 'stroke-dashoffset 0.2s';
+                circle.style.strokeDashoffset = (2 * Math.PI * ((data.size + 6) / 2 - 3)) + '';
+            }
+        }
+
+        function onDown(e) {
+            if (state.popping) return;
+            e.preventDefault(); e.stopPropagation();
+            const p = getPos(e);
+            startX = p.x; startY = p.y;
+            origX = state.x; origY = state.y;
+            state.isDragging = true; dragMoved = false;
+            lastDragX = p.x; lastDragY = p.y;
+            prevDragX = p.x; prevDragY = p.y;
+            el.style.zIndex = '10';
+            startHold();
+        }
+
+        function onMove(e) {
+            if (!state.isDragging) return;
+            e.preventDefault();
+            const p = getPos(e);
+            const dx = p.x - startX, dy = p.y - startY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { dragMoved = true; cancelHold(); }
+            const cr = canvasEl.getBoundingClientRect();
+            let nx = origX + dx, ny = origY + dy;
+            nx = Math.max(5, Math.min(cr.width - data.size - 5, nx));
+            ny = Math.max(5, Math.min(cr.height - data.size - 5, ny));
+            state.x = nx; state.y = ny;
+            prevDragX = lastDragX; prevDragY = lastDragY;
+            lastDragX = p.x; lastDragY = p.y;
+        }
+
+        function onUp() {
+            if (!state.isDragging) return;
+            state.isDragging = false;
+            el.style.zIndex = '5';
+            if (dragMoved) {
+                cancelHold();
+                const throwVx = (lastDragX - prevDragX) * PHYSICS.dragThrowMultiplier;
+                const throwVy = (lastDragY - prevDragY) * PHYSICS.dragThrowMultiplier;
+                const speed = Math.sqrt(throwVx * throwVx + throwVy * throwVy);
+                if (speed > PHYSICS.maxVelocity) {
+                    const sc = PHYSICS.maxVelocity / speed;
+                    state.vx = throwVx * sc; state.vy = throwVy * sc;
+                } else { state.vx = throwVx; state.vy = throwVy; }
+            }
+            state.anchorX = state.x; state.anchorY = state.y;
+        }
+
+        el.addEventListener('mousedown', onDown);
+        el.addEventListener('touchstart', onDown, { passive: false });
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('mouseup', onUp);
+        window.addEventListener('touchend', onUp);
+
+        canvasEl.appendChild(el);
+        return state;
+    }
+
+    function popSectionBubble(state) {
+        if (state.popping) return;
+        state.popping = true;
+        state.el.classList.add('popping');
+        playPopSound();
+
+        const cx = state.x + state.radius;
+        const cy = state.y + state.radius;
+        const canvasEl = state.canvas;
+        const engine = Object.values(sectionBubbleEngines).find(e => e.canvas === canvasEl);
+
+        // Push nearby bubbles away
+        if (engine) {
+            for (const other of engine.states) {
+                if (other === state || other.popping || other.isDragging) continue;
+                const ox = other.x + other.radius;
+                const oy = other.y + other.radius;
+                const dx = ox - cx; const dy = oy - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < state.radius * 3 && dist > 0.001) {
+                    const force = (1 - dist / (state.radius * 3)) * 0.5;
+                    other.vx += (dx / dist) * force; other.vy += (dy / dist) * force;
+                }
+            }
+        }
+
+        // Particles
+        for (let i = 0; i < 10; i++) {
+            const p = document.createElement('div');
+            p.className = 'pop-particle';
+            const a = (Math.PI * 2 / 10) * i + Math.random() * 0.4;
+            const d = 30 + Math.random() * 60;
+            const sz = 3 + Math.random() * 6;
+            p.style.cssText = `left:${cx}px;top:${cy}px;width:${sz}px;height:${sz}px;background:${state.data.color};--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d - 20}px;`;
+            canvasEl.appendChild(p); setTimeout(() => p.remove(), 600);
+        }
+        for (let i = 0; i < 6; i++) {
+            const sp = document.createElement('div');
+            sp.className = 'pop-sparkle';
+            const a = Math.random() * Math.PI * 2;
+            const d = 30 + Math.random() * 80;
+            sp.style.cssText = `left:${cx}px;top:${cy}px;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d - 15}px;`;
+            canvasEl.appendChild(sp); setTimeout(() => sp.remove(), 500);
+        }
+
+        // Remove and respawn
+        setTimeout(() => {
+            state.el.remove();
+            if (engine) {
+                const idx = engine.states.indexOf(state);
+                if (idx > -1) engine.states.splice(idx, 1);
+                // Respawn
+                const newData = { ...state.data, x: 2 + Math.random() * 90, y: 5 + Math.random() * 80 };
+                // Place on edges (left or right side)
+                if (Math.random() > 0.5) newData.x = Math.random() > 0.5 ? 1 + Math.random() * 6 : 88 + Math.random() * 8;
+                const newState = createSectionBubble(newData, Math.floor(Math.random() * 3), canvasEl);
+                engine.states.push(newState);
+            }
+        }, 800 + Math.random() * 400);
+    }
+
+    function sectionPhysicsStep(engine) {
+        if (!engine.active) return;
+        const cr = engine.canvas.getBoundingClientRect();
+        const cw = cr.width; const ch = cr.height;
+
+        for (const s of engine.states) {
+            if (s.isDragging || s.popping) continue;
+
+            s.orbitAngle += PHYSICS.orbitSpeed * s.orbitSpeedMult;
+            const orbitX = Math.cos(s.orbitAngle) * PHYSICS.orbitRadius;
+            const orbitY = Math.sin(s.orbitAngle) * PHYSICS.orbitRadius;
+
+            const targetX = s.anchorX + orbitX;
+            const targetY = s.anchorY + orbitY;
+            s.vx += (targetX - s.x) * PHYSICS.anchorReturnStrength;
+            s.vy += (targetY - s.y) * PHYSICS.anchorReturnStrength;
+            s.vx += (Math.random() - 0.5) * PHYSICS.randomDriftStrength;
+            s.vy += (Math.random() - 0.5) * PHYSICS.randomDriftStrength;
+            s.vx *= PHYSICS.friction; s.vy *= PHYSICS.friction;
+
+            const speed = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
+            if (speed > PHYSICS.maxVelocity) { s.vx = (s.vx / speed) * PHYSICS.maxVelocity; s.vy = (s.vy / speed) * PHYSICS.maxVelocity; }
+
+            s.x += s.vx; s.y += s.vy;
+
+            if (s.x < 2) { s.x = 2; s.vx = Math.abs(s.vx) * PHYSICS.bounceDamping * 0.3; }
+            if (s.x > cw - s.data.size - 2) { s.x = cw - s.data.size - 2; s.vx = -Math.abs(s.vx) * PHYSICS.bounceDamping * 0.3; }
+            if (s.y < 2) { s.y = 2; s.vy = Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3; }
+            if (s.y > ch - s.data.size - 2) { s.y = ch - s.data.size - 2; s.vy = -Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3; }
+
+            const squishDx = 1.0 - s.squishX; const squishDy = 1.0 - s.squishY;
+            s.squishVX += squishDx * PHYSICS.squishStiffness; s.squishVY += squishDy * PHYSICS.squishStiffness;
+            s.squishVX *= PHYSICS.squishDamping; s.squishVY *= PHYSICS.squishDamping;
+            s.squishX += s.squishVX; s.squishY += s.squishVY;
+        }
+
+        // Bubble-to-bubble collisions within section
+        for (let i = 0; i < engine.states.length; i++) {
+            for (let j = i + 1; j < engine.states.length; j++) {
+                const a = engine.states[i]; const b = engine.states[j];
+                if (a.popping || b.popping) continue;
+                const ax = a.x + a.radius; const ay = a.y + a.radius;
+                const bx = b.x + b.radius; const by = b.y + b.radius;
+                const dx = bx - ax; const dy = by - ay;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const minDist = a.radius + b.radius;
+                if (dist < minDist && dist > 0.001) {
+                    const nx = dx / dist; const ny = dy / dist;
+                    const overlap = minDist - dist;
+                    const sepAmount = overlap * PHYSICS.separationStrength + 1.0;
+                    const totalMass = a.mass + b.mass;
+                    if (!a.isDragging) { a.x -= nx * sepAmount * (b.mass / totalMass); a.y -= ny * sepAmount * (b.mass / totalMass); }
+                    if (!b.isDragging) { b.x += nx * sepAmount * (a.mass / totalMass); b.y += ny * sepAmount * (a.mass / totalMass); }
+                    const relVel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+                    if (relVel < 0) {
+                        const impulse = (1 + PHYSICS.restitution) * relVel / (1 / a.mass + 1 / b.mass);
+                        if (!a.isDragging) { a.vx += impulse * nx * PHYSICS.collisionImpulseScale / a.mass; a.vy += impulse * ny * PHYSICS.collisionImpulseScale / a.mass; }
+                        if (!b.isDragging) { b.vx -= impulse * nx * PHYSICS.collisionImpulseScale / b.mass; b.vy -= impulse * ny * PHYSICS.collisionImpulseScale / b.mass; }
+                    }
+                    const impactStrength = Math.min(1, overlap / 5);
+                    if (!a.isDragging) { a.squishX = 1.0 + PHYSICS.squishAmount * impactStrength; a.squishY = 1.0 - PHYSICS.squishAmount * impactStrength * 0.6; }
+                    if (!b.isDragging) { b.squishX = 1.0 + PHYSICS.squishAmount * impactStrength; b.squishY = 1.0 - PHYSICS.squishAmount * impactStrength * 0.6; }
+                }
+            }
+        }
+
+        // Apply positions
+        for (const s of engine.states) {
+            if (s.popping) continue;
+            s.el.style.left = s.x + 'px'; s.el.style.top = s.y + 'px';
+            if (Math.abs(s.squishX - 1) > 0.002 || Math.abs(s.squishY - 1) > 0.002) {
+                s.el.style.transform = `scale(${s.squishX.toFixed(3)}, ${s.squishY.toFixed(3)})`;
+            } else { s.el.style.transform = ''; }
+        }
+
+        requestAnimationFrame(() => sectionPhysicsStep(engine));
+    }
+
+    // Initialize section bubble engines
+    document.querySelectorAll('.section-bubble-canvas').forEach(canvasEl => {
+        const sectionKey = canvasEl.getAttribute('data-section');
+        const bubbleData = SECTION_BUBBLE_SETS[sectionKey];
+        if (!bubbleData) return;
+
+        const engine = { canvas: canvasEl, states: [], active: false };
+        sectionBubbleEngines[sectionKey] = engine;
+
+        // Spawn bubbles (hidden initially since canvas opacity is 0)
+        bubbleData.forEach((d, i) => {
+            const state = createSectionBubble(d, i, canvasEl);
+            engine.states.push(state);
+        });
+    });
+
+    // Use IntersectionObserver to activate/deactivate section bubbles
+    const sectionBubbleObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const canvasEl = entry.target.querySelector('.section-bubble-canvas');
+            if (!canvasEl) return;
+            const sectionKey = canvasEl.getAttribute('data-section');
+            const engine = sectionBubbleEngines[sectionKey];
+            if (!engine) return;
+
+            if (entry.isIntersecting) {
+                canvasEl.classList.add('active');
+                if (!engine.active) {
+                    engine.active = true;
+                    requestAnimationFrame(() => sectionPhysicsStep(engine));
+                }
+            } else {
+                canvasEl.classList.remove('active');
+                engine.active = false;
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '50px 0px' });
+
+    // Observe each section (not the canvas, but the parent section)
+    document.querySelectorAll('.section-bubble-canvas').forEach(c => {
+        if (c.parentElement) sectionBubbleObs.observe(c.parentElement);
+    });
+
     </script>
 </body>
 </html>
