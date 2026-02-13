@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Bubbl - Clear your mind, one bubble at a time</title>
-    <meta name="description" content="Bubbl is a beautifully visual task manager. Create bubbles, organise your thoughts, and pop them when done. Available on iOS.">
+    <title>Bubbl - Do Life Lighter</title>
+    <meta name="description" content="Bubbl turns your tasks into floating bubbles. Speak them into existence, share with your people, and pop them when they're done. Available on iOS.">
     <meta name="theme-color" content="#FFFFFF">
-    <meta property="og:title" content="Bubbl - Clear your mind, one bubble at a time">
-    <meta property="og:description" content="A beautifully visual task manager. Create bubbles, organise your thoughts, and pop them when done.">
+    <meta property="og:title" content="Bubbl - Do Life Lighter">
+    <meta property="og:description" content="Speak your tasks into bubbles, share with your people, and pop them when done. The to-do app that makes life admin lighter.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bubblapp.com">
+    <meta property="og:image" content="https://bubblapp.com/og-image.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -152,7 +155,7 @@
         }
         .pop-sparkle {
             position: absolute; width: 4px; height: 4px; border-radius: 50%;
-            background: white; pointer-events: none;
+            background: #5B8DEF; pointer-events: none;
             animation: sparkleFly 0.5s ease-out forwards;
         }
         @keyframes sparkleFly {
@@ -161,7 +164,7 @@
         }
         .pop-ripple {
             position: absolute; border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.3); pointer-events: none;
+            border: 2px solid rgba(91,141,239,0.4); pointer-events: none;
             animation: rippleExpand 0.6s ease-out forwards;
         }
         @keyframes rippleExpand {
@@ -209,6 +212,33 @@
             transition: transform 0.2s, box-shadow 0.2s !important;
         }
         .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(91,141,239,0.3); }
+
+        /* Mobile hamburger */
+        .nav-hamburger {
+            display: none; width: 28px; height: 20px; cursor: pointer;
+            flex-direction: column; justify-content: space-between; position: relative; z-index: 110;
+        }
+        .nav-hamburger span {
+            display: block; width: 100%; height: 2px; background: var(--text-primary);
+            border-radius: 2px; transition: all 0.3s;
+        }
+        .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
+        .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+        .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+        .mobile-menu {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            font-size: 24px; font-weight: 600; color: var(--text-primary);
+            text-decoration: none; transition: color 0.2s;
+        }
+        .mobile-menu a:hover { color: var(--blue); }
+        .mobile-menu .nav-cta {
+            font-size: 18px; padding: 14px 36px;
+        }
 
         /* ═══════════════════════════════════════ */
         /* HERO                                   */
@@ -267,6 +297,49 @@
         }
         .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
 
+        /* Video showcase */
+        .video-showcase {
+            position: relative; z-index: 2; margin-top: 48px;
+            width: 100%; max-width: 340px;
+        }
+        .video-device {
+            position: relative; width: 100%; aspect-ratio: 886 / 1920;
+            border-radius: 40px; overflow: hidden;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.5);
+            box-shadow:
+                0 30px 80px rgba(91,141,239,0.12),
+                0 10px 30px rgba(0,0,0,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.8),
+                inset 0 -1px 0 rgba(0,0,0,0.04);
+        }
+        .video-device video {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            border-radius: 38px;
+        }
+        .video-device::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 38px; z-index: 2; pointer-events: none;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+        }
+        .video-dots {
+            display: flex; gap: 8px; justify-content: center; margin-top: 16px;
+        }
+        .video-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--text-tertiary); cursor: pointer;
+            transition: all 0.3s; border: none; padding: 0;
+        }
+        .video-dot.active {
+            background: var(--blue); width: 24px; border-radius: 4px;
+        }
+        .video-fade-bottom {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.95));
+            z-index: 3; border-radius: 0 0 38px 38px; pointer-events: none;
+        }
+
         .pop-counter {
             position: relative; z-index: 2; margin-top: 40px; padding-top: 24px;
             border-top: 1px solid rgba(0,0,0,0.06); text-align: center;
@@ -295,7 +368,7 @@
         .section-header { text-align: center; margin-bottom: 64px; }
         .section-header .section-subtitle { margin: 0 auto; }
 
-        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .feature-card { padding: 32px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(20px); transition: all 0.3s; position: relative; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
         .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent); opacity: 0; transition: opacity 0.3s; }
         .feature-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-4px); }
@@ -306,6 +379,7 @@
         .fi-voice { background: rgba(0,212,255,0.12); } .fi-pop { background: rgba(77,201,168,0.12); }
         .fi-copop { background: rgba(155,89,182,0.12); } .fi-categories { background: rgba(255,209,102,0.12); }
         .fi-reminders { background: rgba(91,141,239,0.12); } .fi-stats { background: rgba(184,41,221,0.12); }
+        .fi-checklist { background: rgba(76,175,80,0.12); } .fi-widget { background: rgba(255,142,83,0.12); }
 
         .how-it-works { background: linear-gradient(180deg, var(--bg-deep) 0%, #F0F4FF 50%, var(--bg-deep) 100%); }
         .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
@@ -345,7 +419,9 @@
 
         @media (max-width: 900px) {
             nav { padding: 16px 24px; } .nav-links { display: none; }
+            .nav-hamburger { display: flex; }
             .features-grid { grid-template-columns: repeat(2, 1fr); }
+
             .steps { grid-template-columns: 1fr; gap: 48px; } .steps::before { display: none; }
             .footer-links { gap: 40px; }
         }
@@ -370,14 +446,23 @@
             <a href="#plus">Bubbl+</a>
             <a href="https://apps.apple.com/app/id6758945006" class="nav-cta" target="_blank" rel="noopener">Download</a>
         </div>
+        <div class="nav-hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
     </nav>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#features" onclick="toggleMenu()">Features</a>
+        <a href="#how-it-works" onclick="toggleMenu()">How It Works</a>
+        <a href="#plus" onclick="toggleMenu()">Bubbl+</a>
+        <a href="https://apps.apple.com/app/id6758945006" class="nav-cta" target="_blank" rel="noopener">Download</a>
+    </div>
 
     <section class="hero">
         <div class="hero-glow"></div>
         <div class="bubble-canvas" id="heroCanvas"></div>
         <div class="hero-content">
             <div class="hero-badge"><span class="hero-badge-dot"></span> Available on iOS</div>
-            <h1>Let's make doing<br>stuff <span>lighter.</span></h1>
+            <h1>Make doing life,<br><span>lighter.</span></h1>
             <p>Bubbl turns your tasks into floating bubbles. Create them with your voice, organise them visually, and pop them when they're done.</p>
             <div class="hero-buttons">
                 <a href="https://apps.apple.com/app/id6758945006" class="btn-primary" target="_blank" rel="noopener">
@@ -385,6 +470,19 @@
                     Download for iOS
                 </a>
                 <a href="#features" class="btn-secondary">Learn More</a>
+            </div>
+            <div class="video-showcase">
+                <div class="video-device">
+                    <video id="showcaseVideo" autoplay muted playsinline>
+                        <source src="/videos/preview-1.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-fade-bottom"></div>
+                </div>
+                <div class="video-dots">
+                    <button class="video-dot active" data-video="1"></button>
+                    <button class="video-dot" data-video="2"></button>
+                    <button class="video-dot" data-video="3"></button>
+                </div>
             </div>
             <div class="pop-counter">
                 <div class="pop-counter-value" id="popCounter">0</div>
@@ -403,9 +501,11 @@
             <div class="features-grid">
                 <div class="feature-card fade-in"><div class="feature-icon fi-voice">&#127908;</div><h3>Voice Input</h3><p>Speak your thoughts and Bubbl creates a bubble for you. Smart transcription understands dates, lists, and priorities.</p></div>
                 <div class="feature-card fade-in"><div class="feature-icon fi-pop">&#127881;</div><h3>Pop to Complete</h3><p>Done with a task? Pop the bubble. It's satisfying, it's visual, and it feels like clearing mental clutter.</p></div>
-                <div class="feature-card fade-in"><div class="feature-icon fi-copop">&#129309;</div><h3>Co-Pop</h3><p>Share bubbles with a partner, housemate, or teammate. Collaborate on tasks and pop them together.</p></div>
+                <div class="feature-card fade-in"><div class="feature-icon fi-copop">&#129309;</div><h3>Co-Pop</h3><p>Share bubbles with your partner, housemate, or anyone you do life with. Tackle tasks together.</p></div>
+                <div class="feature-card fade-in"><div class="feature-icon fi-checklist">&#9745;</div><h3>Checklists</h3><p>Add multi-item checklists inside any bubble. Track progress, attach photos, and tick things off as you go.</p></div>
                 <div class="feature-card fade-in"><div class="feature-icon fi-categories">&#127912;</div><h3>Categories</h3><p>Colour-coded categories keep your bubbles organised. Personal, Work, Health, Ideas, and more.</p></div>
                 <div class="feature-card fade-in"><div class="feature-icon fi-reminders">&#128276;</div><h3>Smart Reminders</h3><p>Set reminders on any bubble so nothing slips through the cracks. Bubbles grow as their due date approaches.</p></div>
+                <div class="feature-card fade-in"><div class="feature-icon fi-widget">&#128241;</div><h3>Home Screen Widget</h3><p>See your bubbles at a glance without opening the app. Quick access to what matters right from your Home Screen.</p></div>
                 <div class="feature-card fade-in"><div class="feature-icon fi-stats">&#128200;</div><h3>Statistics</h3><p>Track your productivity with bubble stats. See how many you've created, popped, and your current streak.</p></div>
             </div>
         </div>
@@ -419,9 +519,9 @@
                 <p class="section-subtitle">Three steps. That's it.</p>
             </div>
             <div class="steps">
-                <div class="step fade-in"><div class="step-number">1</div><h3>Create</h3><p>Tap the button or use your voice. Your thought becomes a floating bubble on your canvas.</p></div>
-                <div class="step fade-in"><div class="step-number">2</div><h3>Organise</h3><p>Drag bubbles around, categorise them, add details. Your canvas, your layout.</p></div>
-                <div class="step fade-in"><div class="step-number">3</div><h3>Pop</h3><p>When a task is done, pop it. Watch it disappear with a satisfying burst and keep your streak going.</p></div>
+                <div class="step fade-in"><div class="step-number">1</div><h3>Speak</h3><p>Say what's on your mind. Bubbl turns your voice into organised tasks with smart transcription.</p></div>
+                <div class="step fade-in"><div class="step-number">2</div><h3>Share</h3><p>Send bubbles to your partner, housemate, or anyone you share life with. Tackle things together.</p></div>
+                <div class="step fade-in"><div class="step-number">3</div><h3>Pop</h3><p>Done? Pop it. Watch it burst with a satisfying animation and keep your streak going.</p></div>
             </div>
         </div>
     </section>
@@ -453,7 +553,7 @@
 
     <footer>
         <div class="footer-container">
-            <div class="footer-brand"><div class="nav-logo">Bubbl</div><p>Do Lighter.</p></div>
+            <div class="footer-brand"><div class="nav-logo">Bubbl</div><p>Do Life Lighter.</p></div>
             <div class="footer-links">
                 <div class="footer-col"><h4>App</h4><a href="https://apps.apple.com/app/id6758945006" target="_blank" rel="noopener">Download</a><a href="#features">Features</a><a href="#plus">Bubbl+</a></div>
                 <div class="footer-col"><h4>Legal</h4><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>
@@ -1254,6 +1354,53 @@
         entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 80); obs.unobserve(e.target); } });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+    // Video showcase — auto-cycle through 3 previews
+    (function() {
+        const video = document.getElementById('showcaseVideo');
+        const dots = document.querySelectorAll('.video-dot');
+        const videos = ['/videos/preview-1.mp4', '/videos/preview-2.mp4', '/videos/preview-3.mp4'];
+        let currentVideo = 0;
+        let cycleTimer = null;
+
+        function switchTo(idx) {
+            currentVideo = idx;
+            video.style.opacity = '0';
+            video.style.transition = 'opacity 0.4s';
+            setTimeout(() => {
+                video.src = videos[idx];
+                video.load();
+                video.play();
+                video.style.opacity = '1';
+            }, 400);
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        }
+
+        function nextVideo() {
+            switchTo((currentVideo + 1) % videos.length);
+        }
+
+        // Auto-cycle when each video ends
+        video.addEventListener('ended', () => {
+            nextVideo();
+        });
+
+        // Dot clicks
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                switchTo(i);
+            });
+        });
+    })();
+
+    // Mobile menu toggle
+    function toggleMenu() {
+        document.getElementById('hamburger').classList.toggle('open');
+        document.getElementById('mobileMenu').classList.toggle('open');
+        document.body.style.overflow = document.getElementById('mobileMenu').classList.contains('open') ? 'hidden' : '';
+    }
+    // Make toggleMenu global
+    window.toggleMenu = toggleMenu;
 
     // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(a => {
