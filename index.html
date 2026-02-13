@@ -37,21 +37,18 @@
         /* BUBBLE CANVAS                          */
         /* ═══════════════════════════════════════ */
         .bubble-canvas {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 5; overflow: hidden; pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; overflow: hidden;
         }
-        .bubble-canvas .glossy-bubble { pointer-events: auto; }
 
         .glossy-bubble {
             position: absolute; border-radius: 50%;
             cursor: grab; user-select: none; -webkit-user-select: none;
             touch-action: none; z-index: 5;
             will-change: left, top, transform;
-            opacity: 0.85; transition: opacity 0.3s;
         }
-        .glossy-bubble:hover { opacity: 1; }
-        .glossy-bubble:active { cursor: grabbing; opacity: 1; }
-        .glossy-bubble.static-bubble { opacity: 0.7; filter: saturate(0.7); }
+        .glossy-bubble:active { cursor: grabbing; }
+        .glossy-bubble.static-bubble { opacity: 0.8; filter: saturate(0.7); }
 
         .bubble-sphere {
             width: 100%; height: 100%; border-radius: 50%;
@@ -106,9 +103,8 @@
             position: absolute; pointer-events: none;
             white-space: nowrap;
         }
-        /* Due date: floats above bubble center, offset by radius + 8px */
+        /* Due date: top-left at 225° on circumference */
         .badge-due {
-            left: 50%; transform: translateX(-50%);
             padding: 3px 8px; border-radius: 10px;
             font-size: 9px; font-weight: 600; color: white;
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -247,9 +243,9 @@
         /* HERO                                   */
         /* ═══════════════════════════════════════ */
         .hero {
-            position: relative;
+            position: relative; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 140px 24px 60px; z-index: 1;
+            text-align: center; padding: 120px 24px 60px; z-index: 1;
         }
         .hero-glow {
             position: absolute; width: 700px; height: 700px; border-radius: 50%;
@@ -451,10 +447,9 @@
         <a href="https://apps.apple.com/app/id6758945006" class="nav-cta" target="_blank" rel="noopener">Download</a>
     </div>
 
-    <div class="bubble-canvas" id="heroCanvas"></div>
-
     <section class="hero">
         <div class="hero-glow"></div>
+        <div class="bubble-canvas" id="heroCanvas"></div>
         <div class="hero-content">
             <div class="hero-badge"><span class="hero-badge-dot"></span> Available on iOS</div>
             <h1>Make doing life,<br><span>lighter.</span></h1>
@@ -552,49 +547,21 @@
 
     <script>
     // ═══════════════════════════════════════════════════
-    // BUBBLE DATA WITH BADGES
+    // BUBBLE DATA — intentional badges matching real app usage
     // ═══════════════════════════════════════════════════
     // Bubbles positioned around the edges to avoid hero content center
     const BUBBLES = [
-        { label: 'Buy groceries', color: '#5B8DEF', size: 110, x: 3, y: 12 },
-        { label: 'Call dentist', color: '#E056A0', size: 90, x: 82, y: 10 },
-        { label: 'Finish report', color: '#9B59B6', size: 105, x: 5, y: 65 },
+        { label: 'Buy groceries', color: '#5B8DEF', size: 110, x: 3, y: 12, due: 'Today', checklist: { done: 1, total: 4 } },
+        { label: 'Call dentist', color: '#E056A0', size: 90, x: 82, y: 10, due: 'Tomorrow' },
+        { label: 'Finish report', color: '#9B59B6', size: 105, x: 5, y: 65, due: 'Overdue' },
         { label: 'Gym', color: '#00D4FF', size: 75, x: 88, y: 60 },
-        { label: 'Pick up parcel', color: '#FFD166', size: 95, x: 2, y: 38 },
-        { label: 'Book flights', color: '#FF8E53', size: 88, x: 85, y: 35 },
+        { label: 'Pick up parcel', color: '#FFD166', size: 95, x: 2, y: 38, due: '20 Feb', sender: 'Jess' },
+        { label: 'Book flights', color: '#FF8E53', size: 88, x: 85, y: 35, checklist: { done: 1, total: 3 }, taggedPartner: 'Tom' },
         { label: 'Walk the dog', color: '#4DC9A8', size: 78, x: 75, y: 80 },
-        { label: 'Meal prep', color: '#00B4D8', size: 72, x: 15, y: 82 },
-        { label: 'Reply to Sam', color: '#E06B85', size: 85, x: 88, y: 82 },
+        { label: 'Meal prep', color: '#00B4D8', size: 72, x: 15, y: 82, checklist: { done: 2, total: 5 }, due: '14 Feb' },
+        { label: 'Reply to Sam', color: '#E06B85', size: 85, x: 88, y: 82, sender: 'Sam' },
         { label: 'Water plants', color: '#3EAF85', size: 70, x: 5, y: 82 },
     ];
-
-    // Randomize badges on each bubble (matching app badge types)
-    const DUE_OPTIONS = ['Overdue', 'Today', 'Tomorrow', '14 Feb', '20 Feb', '28 Feb'];
-    const CHECKLIST_OPTIONS = [
-        { done: 1, total: 3 }, { done: 2, total: 5 }, { done: 0, total: 4 },
-        { done: 3, total: 6 }, { done: 1, total: 2 }, { done: 4, total: 4 },
-    ];
-    const PARTNER_NAMES = ['Jess', 'Tom', 'Mia', 'Alex', 'Lily'];
-
-    // Assign random badges
-    BUBBLES.forEach(b => {
-        // ~60% chance of a due date
-        if (Math.random() < 0.6) b.due = DUE_OPTIONS[Math.floor(Math.random() * DUE_OPTIONS.length)];
-        // ~40% chance of a checklist
-        if (Math.random() < 0.4) {
-            const cl = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
-            b.checklist = cl;
-        }
-        // ~30% chance of a partner (tagged) — shown top-left
-        // ~25% chance of a sender (received) — shown bottom-left
-        // Mutually exclusive: a bubble is either yours with a tagged partner, or received from a sender
-        const shareRoll = Math.random();
-        if (shareRoll < 0.3) {
-            b.taggedPartner = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
-        } else if (shareRoll < 0.55) {
-            b.sender = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
-        }
-    });
 
     const canvas = document.getElementById('heroCanvas');
     let popCount = 0;
@@ -689,9 +656,10 @@
         el.style.width = data.size + 'px';
         el.style.height = data.size + 'px';
 
-        // Convert percentage to pixel position (viewport)
-        const px = (data.x / 100) * window.innerWidth;
-        const py = (data.y / 100) * window.innerHeight;
+        // Convert percentage to pixel position relative to canvas
+        const canvasRect = canvas.getBoundingClientRect();
+        const px = (data.x / 100) * canvasRect.width;
+        const py = (data.y / 100) * canvasRect.height;
 
         el.style.left = px + 'px';
         el.style.top = py + 'px';
@@ -732,25 +700,28 @@
             index: index,
         };
 
-        // Build badges HTML — positioned on circumference like iOS app
+        // Build badges HTML — positioned on circumference matching iOS app exactly
         let badgesHTML = '';
         const r = radius;
         const badgeScale = Math.min(1.4, Math.max(0.8, data.size / 100));
 
-        // Due date badge: above bubble, centered, offset by radius + 8
+        // Due date badge: top-left at 225° (5π/4) on circumference — matches app
         if (data.due) {
             let dueClass = 'future';
             let icon = '';
             if (data.due === 'Overdue') { dueClass = 'overdue'; icon = '⚠ '; }
             else if (data.due === 'Today') { dueClass = 'today'; icon = '⏱ '; }
             else if (data.due === 'Tomorrow') dueClass = 'tomorrow';
-            const dueTop = -(8 * badgeScale);
-            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}" style="top:${dueTop}px;font-size:${Math.round(9 * badgeScale)}px;">${icon}${data.due}</div>`;
+            const angle = Math.PI * 5 / 4; // 225 degrees (top-left)
+            const cx = r + Math.cos(angle) * r;
+            const cy = r + Math.sin(angle) * r;
+            const sz = Math.round(9 * badgeScale);
+            badgesHTML += `<div class="bubble-badge badge-due ${dueClass}" style="left:${cx}px;top:${cy}px;transform:translate(-50%,-50%);font-size:${sz}px;">${icon}${data.due}</div>`;
         }
 
-        // Checklist badge: bottom-right at 45° on circumference
+        // Checklist badge: bottom-right at 45° (π/4) on circumference — matches app
         if (data.checklist) {
-            const angle = Math.PI / 4; // 45 degrees
+            const angle = Math.PI / 4; // 45 degrees (bottom-right)
             const cx = r + Math.cos(angle) * r;
             const cy = r + Math.sin(angle) * r;
             const isComplete = data.checklist.done === data.checklist.total;
@@ -759,24 +730,14 @@
             badgesHTML += `<div class="bubble-badge badge-checklist${clsExtra}" style="left:${cx}px;top:${cy}px;transform:translate(-50%,-50%);font-size:${sz}px;">&#9745; ${data.checklist.done}/${data.checklist.total}</div>`;
         }
 
-        // Tagged partner avatar: top-left at -135° on circumference
-        if (data.taggedPartner) {
-            const angle = -Math.PI * 3 / 4; // -135 degrees (top-left)
-            const cx = r + Math.cos(angle) * r;
-            const cy = r + Math.sin(angle) * r;
-            const avSize = Math.round(22 * badgeScale);
-            const initial = data.taggedPartner[0];
-            const fs = Math.round(avSize * 0.4);
-            badgesHTML += `<div class="bubble-badge badge-avatar" style="left:${cx}px;top:${cy}px;width:${avSize}px;height:${avSize}px;transform:translate(-50%,-50%);font-size:${fs}px;">${initial}</div>`;
-        }
-
-        // Sender avatar: bottom-left at 135° on circumference
-        if (data.sender) {
+        // Partner avatar (tagged or sender): bottom-left at 135° (3π/4) on circumference — matches app
+        const partnerName = data.taggedPartner || data.sender;
+        if (partnerName) {
             const angle = Math.PI * 3 / 4; // 135 degrees (bottom-left)
             const cx = r + Math.cos(angle) * r;
             const cy = r + Math.sin(angle) * r;
             const avSize = Math.round(24 * badgeScale);
-            const initial = data.sender[0];
+            const initial = partnerName[0];
             const fs = Math.round(avSize * 0.4);
             badgesHTML += `<div class="bubble-badge badge-avatar" style="left:${cx}px;top:${cy}px;width:${avSize}px;height:${avSize}px;transform:translate(-50%,-50%);font-size:${fs}px;">${initial}</div>`;
         }
@@ -856,9 +817,10 @@
                 dragMoved = true;
                 cancelHold();
             }
+            const cr = canvas.getBoundingClientRect();
             let nx = origX + dx, ny = origY + dy;
-            nx = Math.max(5, Math.min(window.innerWidth - data.size - 5, nx));
-            ny = Math.max(15, Math.min(window.innerHeight - data.size - 10, ny));
+            nx = Math.max(5, Math.min(cr.width - data.size - 5, nx));
+            ny = Math.max(15, Math.min(cr.height - data.size - 10, ny));
             state.x = nx;
             state.y = ny;
 
@@ -987,8 +949,10 @@
     // PHYSICS ENGINE (60fps loop)
     // ═══════════════════════════════════════════════════
     function physicsStep() {
-        const cw = window.innerWidth;
-        const ch = window.innerHeight;
+        const canvasRect = canvas.getBoundingClientRect();
+        const cw = canvasRect.width;
+        const ch = canvasRect.height;
+        const obstacleRect = getObstacleRect();
 
         for (let i = 0; i < bubbleStates.length; i++) {
             const s = bubbleStates[i];
@@ -1050,6 +1014,9 @@
                 s.vy = -Math.abs(s.vy) * PHYSICS.bounceDamping * 0.3;
                 s.anchorY = Math.min(ch - s.radius * 0.5 - padBot, s.anchorY);
             }
+
+            // ── Hero content obstacle collision ──
+            resolveCircleRect(s, obstacleRect);
 
             // ── Squish spring-back ──
             const squishDx = 1.0 - s.squishX;
@@ -1221,20 +1188,11 @@
             const idx = bubbleStates.indexOf(state);
             if (idx > -1) bubbleStates.splice(idx, 1);
 
-            // Respawn with new random position (within safe padded zone)
+            // Respawn same bubble with new position (within safe padded zone)
             const newData = { ...state.data,
                 x: 5 + Math.random() * 80,
                 y: 8 + Math.random() * 70,
             };
-            // Re-randomize badges for the respawned bubble
-            delete newData.due; delete newData.checklist;
-            delete newData.taggedPartner; delete newData.sender;
-            if (Math.random() < 0.6) newData.due = DUE_OPTIONS[Math.floor(Math.random() * DUE_OPTIONS.length)];
-            if (Math.random() < 0.4) newData.checklist = CHECKLIST_OPTIONS[Math.floor(Math.random() * CHECKLIST_OPTIONS.length)];
-            const shareRoll = Math.random();
-            if (shareRoll < 0.3) newData.taggedPartner = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
-            else if (shareRoll < 0.55) newData.sender = PARTNER_NAMES[Math.floor(Math.random() * PARTNER_NAMES.length)];
-
             createBubble(newData, Math.floor(Math.random() * 3), true);
         }, 1000 + Math.random() * 500);
     }
@@ -1260,32 +1218,32 @@
     // ═══════════════════════════════════════════════════
     let lastCanvasWidth = 0, lastCanvasHeight = 0;
     function handleResize() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+        const cr = canvas.getBoundingClientRect();
         if (lastCanvasWidth === 0) {
-            lastCanvasWidth = w;
-            lastCanvasHeight = h;
+            lastCanvasWidth = cr.width;
+            lastCanvasHeight = cr.height;
             return;
         }
-        const scaleX = w / lastCanvasWidth;
-        const scaleY = h / lastCanvasHeight;
+        const scaleX = cr.width / lastCanvasWidth;
+        const scaleY = cr.height / lastCanvasHeight;
         for (const s of bubbleStates) {
             s.x *= scaleX;
             s.y *= scaleY;
             s.anchorX *= scaleX;
             s.anchorY *= scaleY;
         }
-        lastCanvasWidth = w;
-        lastCanvasHeight = h;
+        lastCanvasWidth = cr.width;
+        lastCanvasHeight = cr.height;
     }
     window.addEventListener('resize', handleResize);
 
     // Init bubbles
     BUBBLES.forEach((d, i) => createBubble(d, i, true));
 
-    // Store initial size and start physics
-    lastCanvasWidth = window.innerWidth;
-    lastCanvasHeight = window.innerHeight;
+    // Store initial canvas size and start physics
+    const initRect = canvas.getBoundingClientRect();
+    lastCanvasWidth = initRect.width;
+    lastCanvasHeight = initRect.height;
     requestAnimationFrame(physicsStep);
 
     // Background bubbles (decorative, no physics)
